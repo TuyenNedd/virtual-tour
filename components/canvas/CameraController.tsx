@@ -4,7 +4,6 @@ import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useViewModeStore } from '@/stores/viewModeStore';
-import { useSweepStore } from '@/stores/sweepStore';
 import { useCameraTransition } from '@/hooks/useCameraTransition';
 import { easeInOutCubic, lerp } from '@/lib/transitions';
 import { TRANSITION_DURATION } from '@/lib/constants';
@@ -16,24 +15,29 @@ export function CameraController() {
   const startTargetRef = useRef(new THREE.Vector3());
   const startFovRef = useRef(75);
   const transitionStartedRef = useRef(false);
+  const phaseAdvancedRef = useRef(false);
 
   const { transitionState, isTransitioning, getTargetCameraState } = useCameraTransition();
   const completeTransition = useViewModeStore((s) => s.completeTransition);
+  const advanceTransitionPhase = useViewModeStore((s) => s.advanceTransitionPhase);
   const setTransitionProgress = useViewModeStore((s) => s.setTransitionProgress);
-  const currentSweepId = useSweepStore((s) => s.currentSweepId);
-  const sweeps = useSweepStore((s) => s.sweeps);
 
   useFrame((_, delta) => {
     if (!isTransitioning || !transitionState.active) {
       transitionStartedRef.current = false;
+      phaseAdvancedRef.current = false;
       return;
     }
 
     if (!transitionStartedRef.current) {
       transitionStartedRef.current = true;
+      phaseAdvancedRef.current = false;
       progressRef.current = 0;
       startPosRef.current.copy(camera.position);
-      startTargetRef.current.set(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
+      startTargetRef.current
+        .set(0, 0, -1)
+        .applyQuaternion(camera.quaternion)
+        .add(camera.position);
       startFovRef.current = (camera as THREE.PerspectiveCamera).fov;
     }
 
@@ -41,12 +45,13 @@ export function CameraController() {
     const t = Math.min(progressRef.current, 1);
     const eased = easeInOutCubic(t);
 
-    const currentSweep = sweeps[currentSweepId];
-    const sweepPos: [number, number, number] = currentSweep
-      ? currentSweep.position
-      : [0, 0, 0];
+    // At the midpoint, advance the transition phase to switch the rendered view
+    if (t >= 0.5 && !phaseAdvancedRef.current) {
+      phaseAdvancedRef.current = true;
+      advanceTransitionPhase();
+    }
 
-    const target = getTargetCameraState(transitionState.to, sweepPos);
+    const target = getTargetCameraState(transitionState.to);
 
     camera.position.set(
       lerp(startPosRef.current.x, target.position[0], eased),
@@ -70,6 +75,7 @@ export function CameraController() {
     if (t >= 1) {
       completeTransition();
       transitionStartedRef.current = false;
+      phaseAdvancedRef.current = false;
     }
   });
 
