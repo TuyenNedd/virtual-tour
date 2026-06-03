@@ -30,7 +30,7 @@
       "position": [3, 0, -2],
       "rotation": [0, 0.5, 0],
       "neighbors": ["sweep-1", "sweep-3"],
-      "panoramaUrl": "/panoramas/sundowner_deck.jpg",
+      "panoramaUrl": "/panoramas/medieval_cafe.jpg",
       "floor": 0
     },
     {
@@ -38,7 +38,7 @@
       "position": [-2, 0, 3],
       "rotation": [0, -0.3, 0],
       "neighbors": ["sweep-1", "sweep-2"],
-      "panoramaUrl": "/panoramas/sundowner_deck.jpg",
+      "panoramaUrl": "/panoramas/qwantani_patio.jpg",
       "floor": 0
     },
     {
@@ -46,7 +46,7 @@
       "position": [0, 3, 0],
       "rotation": [0, 0, 0],
       "neighbors": ["sweep-5"],
-      "panoramaUrl": "/panoramas/sundowner_deck.jpg",
+      "panoramaUrl": "/panoramas/medieval_cafe.jpg",
       "floor": 1
     },
     {
@@ -54,7 +54,7 @@
       "position": [3, 3, -2],
       "rotation": [0, 1.0, 0],
       "neighbors": ["sweep-4"],
-      "panoramaUrl": "/panoramas/sundowner_deck.jpg",
+      "panoramaUrl": "/panoramas/qwantani_patio.jpg",
       "floor": 1
     }
   ]
