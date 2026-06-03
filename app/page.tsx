@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useSpaceStore } from '@/stores/spaceStore';
+import { useSweepStore } from '@/stores/sweepStore';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { ModeButtons } from '@/components/ui/ModeButtons';
 import { FloorSelector } from '@/components/ui/FloorSelector';
@@ -17,7 +18,24 @@ const Scene = dynamic(
 export default function Home() {
   const isLoaded = useSpaceStore((s) => s.isLoaded);
   const loadSpace = useSpaceStore((s) => s.loadSpace);
+  const isNavigating = useSweepStore((s) => s.isNavigating);
+  const completeNavigation = useSweepStore((s) => s.completeNavigation);
   const [error, setError] = useState<string | null>(null);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Handle fade transition: when isNavigating becomes true, wait for fade-out then complete
+  useEffect(() => {
+    if (isNavigating) {
+      fadeTimerRef.current = setTimeout(() => {
+        completeNavigation();
+      }, 400);
+    }
+    return () => {
+      if (fadeTimerRef.current) {
+        clearTimeout(fadeTimerRef.current);
+      }
+    };
+  }, [isNavigating, completeNavigation]);
 
   useEffect(() => {
     async function fetchData() {
@@ -67,6 +85,11 @@ export default function Home() {
           <Minimap />
         </>
       )}
+      <div
+        className={`fixed inset-0 z-30 bg-black transition-opacity duration-[400ms] pointer-events-none ${
+          isNavigating ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
     </main>
   );
 }

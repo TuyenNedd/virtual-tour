@@ -1,75 +1,125 @@
 'use client';
 
-import { useRef, useMemo, useEffect } from 'react';
-import { useThree } from '@react-three/fiber';
+import { useState, useCallback, useEffect } from 'react';
+import { useThree, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls } from '@react-three/drei';
-import { useSweepNavigation } from '@/hooks/useSweepNavigation';
 import { useViewModeStore } from '@/stores/viewModeStore';
-import { ViewMode } from '@/lib/types';
+import { useSweepStore } from '@/stores/sweepStore';
+import { ViewMode, Sweep } from '@/lib/types';
+import { SWEEP_PUCK_COLOR } from '@/lib/constants';
 
-function createGradientTexture(): THREE.CanvasTexture {
-  const canvas = document.createElement('canvas');
-  canvas.width = 2048;
-  canvas.height = 1024;
-  const ctx = canvas.getContext('2d')!;
+function PanoramaSweepPuck({ sweep, currentSweep }: { sweep: Sweep; currentSweep: Sweep }) {
+  const [hovered, setHovered] = useState(false);
+  const startNavigation = useSweepStore((s) => s.startNavigation);
 
-  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, '#1a237e');
-  gradient.addColorStop(0.3, '#4fc3f7');
-  gradient.addColorStop(0.6, '#ffb74d');
-  gradient.addColorStop(1, '#ff7043');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Calculate direction from current sweep to neighbor in XZ plane
+  const dx = sweep.position[0] - currentSweep.position[0];
+  const dz = sweep.position[2] - currentSweep.position[2];
+  const dist = Math.sqrt(dx * dx + dz * dz);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.mapping = THREE.EquirectangularReflectionMapping;
-  return texture;
+  // Normalize direction and place puck at fixed distance from origin
+  const puckDistance = 3;
+  let px: number, pz: number;
+  if (dist > 0.01) {
+    px = (dx / dist) * puckDistance;
+    pz = (dz / dist) * puckDistance;
+  } else {
+    // Fallback if sweeps are at same XZ position (different floor)
+    px = puckDistance;
+    pz = 0;
+  }
+
+  const scale = hovered ? 1.4 : 1.0;
+  const color = hovered ? '#80d8ff' : SWEEP_PUCK_COLOR;
+
+  return (
+    <mesh
+      position={[px, -1.5, pz]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      scale={[scale, scale, 1]}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = 'default';
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        startNavigation(sweep.id);
+      }}
+    >
+      <circleGeometry args={[0.3, 32]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={0.9}
+        toneMapped={false}
+      />
+    </mesh>
+  );
 }
 
-export function PanoramaView() {
-  const { currentSweep } = useSweepNavigation();
-  const isTransitioning = useViewModeStore((s) => s.isTransitioning);
-  const currentMode = useViewModeStore((s) => s.currentMode);
-  const textureRef = useRef<THREE.CanvasTexture | null>(null);
-  const { camera } = useThree();
+function PanoramaSweepPucks() {
+  const getNeighbors = useSweepStore((s) => s.getNeighbors);
+  const currentSweepId = useSweepStore((s) => s.currentSweepId);
+  const sweeps = useSweepStore((s) => s.sweeps);
+  const isNavigating = useSweepStore((s) => s.isNavigating);
 
-  const texture = useMemo(() => {
-    const tex = createGradientTexture();
-    textureRef.current = tex;
-    return tex;
-  }, []);
+  const currentSweep = sweeps[currentSweepId];
+  if (!currentSweep || isNavigating) return null;
 
-  useEffect(() => {
-    return () => {
-      if (textureRef.current) {
-        textureRef.current.dispose();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (currentMode === ViewMode.Panorama && currentSweep && !isTransitioning) {
-      camera.position.set(...currentSweep.position);
-    }
-  }, [currentSweep, currentMode, isTransitioning, camera]);
-
-  if (currentMode !== ViewMode.Panorama) return null;
-
-  const position: [number, number, number] = currentSweep
-    ? currentSweep.position
-    : [0, 0, 0];
+  const neighbors = getNeighbors();
 
   return (
     <>
-      <mesh position={position} scale={[-1, 1, 1]}>
+      {neighbors.map((neighbor) => (
+        <PanoramaSweepPuck
+          key={neighbor.id}
+          sweep={neighbor}
+          currentSweep={currentSweep}
+        />
+      ))}
+    </>
+  );
+}
+
+export function PanoramaView() {
+  const currentMode = useViewModeStore((s) => s.currentMode);
+  const isTransitioning = useViewModeStore((s) => s.isTransitioning);
+  const currentSweepId = useSweepStore((s) => s.currentSweepId);
+  const sweeps = useSweepStore((s) => s.sweeps);
+  const { camera } = useThree();
+
+  const currentSweep = sweeps[currentSweepId];
+  const panoramaUrl = currentSweep?.panoramaUrl || '/panoramas/sundowner_deck.jpg';
+
+  const texture = useLoader(THREE.TextureLoader, panoramaUrl);
+
+  // Ensure camera stays at origin in panorama mode
+  useEffect(() => {
+    if (currentMode === ViewMode.Panorama && !isTransitioning) {
+      camera.position.set(0, 0, 0);
+    }
+  }, [currentMode, isTransitioning, camera, currentSweepId]);
+
+  if (currentMode !== ViewMode.Panorama) return null;
+
+  return (
+    <>
+      <mesh position={[0, 0, 0]} scale={[-1, 1, 1]}>
         <sphereGeometry args={[500, 64, 32]} />
         <meshBasicMaterial map={texture} side={THREE.BackSide} />
       </mesh>
+      <PanoramaSweepPucks />
       <OrbitControls
         enableZoom={false}
         enablePan={false}
         rotateSpeed={-0.3}
+        target={[0, 0, 0]}
         enabled={!isTransitioning}
       />
     </>
