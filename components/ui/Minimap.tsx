@@ -2,10 +2,14 @@
 
 import { useRef, useEffect } from 'react';
 import { useSweepNavigation } from '@/hooks/useSweepNavigation';
+import { useViewModeStore } from '@/stores/viewModeStore';
+import { ViewMode } from '@/lib/types';
 
 export function Minimap() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { availableSweeps, currentSweepId } = useSweepNavigation();
+  const cameraYaw = useViewModeStore((s) => s.cameraYaw);
+  const currentMode = useViewModeStore((s) => s.currentMode);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -71,10 +75,41 @@ export function Minimap() {
       ctx.fillStyle = sweep.id === currentSweepId ? '#4fc3f7' : '#888';
       ctx.fill();
     });
-  }, [availableSweeps, currentSweepId]);
+
+    // Draw orientation arrow at current sweep position (only in panorama mode)
+    if (currentMode === ViewMode.Panorama) {
+      const currentSweep = availableSweeps.find((s) => s.id === currentSweepId);
+      if (currentSweep) {
+        const { x, y } = toScreen(currentSweep.position);
+        const arrowLength = 10;
+        // Camera yaw: rotation.y in Three.js, negative because canvas Y is flipped
+        // In Three.js, rotation.y = 0 faces -Z. On our minimap, -Z maps to up (decreasing y)
+        const angle = -cameraYaw - Math.PI / 2;
+
+        const tipX = x + Math.cos(angle) * arrowLength;
+        const tipY = y + Math.sin(angle) * arrowLength;
+        const baseLeft = {
+          x: x + Math.cos(angle + 2.5) * 5,
+          y: y + Math.sin(angle + 2.5) * 5,
+        };
+        const baseRight = {
+          x: x + Math.cos(angle - 2.5) * 5,
+          y: y + Math.sin(angle - 2.5) * 5,
+        };
+
+        ctx.beginPath();
+        ctx.moveTo(tipX, tipY);
+        ctx.lineTo(baseLeft.x, baseLeft.y);
+        ctx.lineTo(baseRight.x, baseRight.y);
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+      }
+    }
+  }, [availableSweeps, currentSweepId, cameraYaw, currentMode]);
 
   return (
-    <div className="fixed right-4 top-4 z-40 overflow-hidden rounded-lg">
+    <div className="fixed right-4 top-4 z-40 overflow-hidden rounded-lg border border-white/10 shadow-lg">
       <canvas ref={canvasRef} className="h-32 w-32" />
     </div>
   );

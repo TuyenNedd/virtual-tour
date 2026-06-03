@@ -7,10 +7,12 @@ interface ViewModeState {
   transitionState: TransitionState;
   isTransitioning: boolean;
   transitionPhase: number;
+  cameraYaw: number;
   setMode: (mode: ViewMode) => void;
   setTransitionProgress: (progress: number) => void;
   advanceTransitionPhase: () => void;
   completeTransition: () => void;
+  setCameraYaw: (yaw: number) => void;
 }
 
 export const useViewModeStore = create<ViewModeState>((set, get) => ({
@@ -24,6 +26,7 @@ export const useViewModeStore = create<ViewModeState>((set, get) => ({
   },
   isTransitioning: false,
   transitionPhase: 0,
+  cameraYaw: 0,
 
   setMode: (mode: ViewMode) => {
     const { currentMode } = get();
@@ -65,5 +68,9 @@ export const useViewModeStore = create<ViewModeState>((set, get) => ({
         progress: 1,
       },
     }));
+  },
+
+  setCameraYaw: (yaw: number) => {
+    set({ cameraYaw: yaw });
   },
 }));
