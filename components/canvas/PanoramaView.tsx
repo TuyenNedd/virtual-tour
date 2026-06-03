@@ -158,6 +158,7 @@ export function PanoramaView() {
   const navDirectionRef = useRef(new THREE.Vector3(0, 0, -1));
   const navTargetIdRef = useRef<string | null>(null);
   const startFovRef = useRef(75);
+  const [navActive, setNavActive] = useState(false); // state to trigger re-render for OrbitControls
 
   // Sphere materials for crossfade
   const currentMatRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -207,6 +208,7 @@ export function PanoramaView() {
     navPhaseRef.current = NAV_PHASE_DOLLY;
     navProgressRef.current = 0;
     startFovRef.current = (camera as THREE.PerspectiveCamera).fov;
+    setNavActive(true); // trigger re-render to disable OrbitControls
 
     // Mark as navigating in store (hides pucks)
     startNavigation(sweepId);
@@ -282,6 +284,7 @@ export function PanoramaView() {
         // Transition complete
         navPhaseRef.current = NAV_PHASE_IDLE;
         navProgressRef.current = 0;
+        setNavActive(false); // trigger re-render to re-enable OrbitControls
 
         // Ensure full opacity and default FOV
         if (currentMatRef.current) {
@@ -294,8 +297,6 @@ export function PanoramaView() {
   });
 
   if (currentMode !== ViewMode.Panorama) return null;
-
-  const isNavActive = navPhaseRef.current !== NAV_PHASE_IDLE;
 
   return (
     <>
@@ -322,7 +323,7 @@ export function PanoramaView() {
         dampingFactor={0.1}
         rotateSpeed={-0.5}
         target={[0, 0, -0.01]}
-        enabled={!isTransitioning && !isNavActive}
+        enabled={!isTransitioning && !navActive}
         makeDefault
       />
     </>
