@@ -5,6 +5,7 @@ import { useThree } from '@react-three/fiber';
 import { MapControls, Line, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useViewModeStore } from '@/stores/viewModeStore';
+import { useSweepStore } from '@/stores/sweepStore';
 import { useSweepNavigation } from '@/hooks/useSweepNavigation';
 import { ViewMode, Sweep } from '@/lib/types';
 import { FLOORPLAN_CAMERA_HEIGHT, ROOM_LABELS } from '@/lib/constants';
@@ -12,11 +13,17 @@ import { FLOORPLAN_CAMERA_HEIGHT, ROOM_LABELS } from '@/lib/constants';
 function FloorplanPuck({ sweep, isCurrent }: { sweep: Sweep; isCurrent: boolean }) {
   const [hovered, setHovered] = useState(false);
   const setMode = useViewModeStore((s) => s.setMode);
-  const { navigateToSweep } = useSweepNavigation();
+  const setCurrentSweep = useSweepStore((s) => s.setCurrentSweep);
 
   const radius = isCurrent ? 0.5 : 0.35;
   const color = isCurrent ? '#4fc3f7' : hovered ? '#aaa' : '#888';
   const scale = hovered ? 1.3 : 1;
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = 'default';
+    };
+  }, []);
 
   return (
     <mesh
@@ -34,7 +41,8 @@ function FloorplanPuck({ sweep, isCurrent }: { sweep: Sweep; isCurrent: boolean 
       }}
       onClick={(e) => {
         e.stopPropagation();
-        navigateToSweep(sweep.id);
+        document.body.style.cursor = 'default';
+        setCurrentSweep(sweep.id);
         setMode(ViewMode.Panorama);
       }}
     >
@@ -52,7 +60,7 @@ export function FloorplanView() {
 
   useEffect(() => {
     if (currentMode === ViewMode.Floorplan && !isTransitioning) {
-      camera.position.set(0, FLOORPLAN_CAMERA_HEIGHT, 0);
+      camera.position.set(0, FLOORPLAN_CAMERA_HEIGHT, 0.01);
       camera.lookAt(0, 0, 0);
       const perspCam = camera as THREE.PerspectiveCamera;
       perspCam.fov = 6;
