@@ -180,18 +180,23 @@ export function PanoramaView() {
     });
   }, [panoramaUrl, textureLoader]);
 
-  // Reset camera on entering panorama mode
-  const hasResetRef = useRef(false);
+  // Reset camera on entering panorama mode or after navigation completes
+  const isNavigating = useSweepStore((s) => s.isNavigating);
+  const prevNavigatingRef = useRef(false);
+
   useEffect(() => {
     if (currentMode === ViewMode.Panorama && !isTransitioning) {
-      if (!hasResetRef.current) {
-        camera.position.set(0, 0, 0);
-        hasResetRef.current = true;
-      }
-    } else {
-      hasResetRef.current = false;
+      camera.position.set(0, 0, 0);
     }
   }, [currentMode, isTransitioning, camera]);
+
+  // After navigation completes, ensure camera is back at origin
+  useEffect(() => {
+    if (prevNavigatingRef.current && !isNavigating) {
+      camera.position.set(0, 0, 0);
+    }
+    prevNavigatingRef.current = isNavigating;
+  }, [isNavigating, camera]);
 
   // Handle navigation start - called by puck click
   const handleNavigate = (sweepId: string, direction: THREE.Vector3) => {
