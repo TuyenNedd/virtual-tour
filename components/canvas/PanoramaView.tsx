@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useThree, useLoader, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls } from '@react-three/drei';
@@ -33,6 +33,12 @@ function PanoramaSweepPuck({ sweep, currentSweep }: { sweep: Sweep; currentSweep
   const scale = hovered ? 1.4 : 1.0;
   const color = hovered ? '#80d8ff' : SWEEP_PUCK_COLOR;
 
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = 'default';
+    };
+  }, []);
+
   return (
     <mesh
       position={[px, -1.5, pz]}
@@ -49,6 +55,7 @@ function PanoramaSweepPuck({ sweep, currentSweep }: { sweep: Sweep; currentSweep
       }}
       onClick={(e) => {
         e.stopPropagation();
+        document.body.style.cursor = 'default';
         startNavigation(sweep.id);
       }}
     >
@@ -113,6 +120,9 @@ export function PanoramaView() {
   const currentSweep = sweeps[currentSweepId];
   const panoramaUrl = currentSweep?.panoramaUrl || '/panoramas/sundowner_deck.jpg';
 
+  // TODO: Implement texture disposal for production use. When navigating between sweeps,
+  // old textures remain in GPU memory. A custom texture cache with manual disposal would
+  // prevent memory growth in spaces with many unique panorama images.
   const texture = useLoader(THREE.TextureLoader, panoramaUrl);
 
   // Ensure camera stays at origin in panorama mode

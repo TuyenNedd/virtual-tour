@@ -103,10 +103,8 @@ export default function Home() {
       <div
         className={`fixed inset-0 z-30 bg-black pointer-events-none transition-opacity duration-[600ms] ${
           isModeTransitioning && transitionPhase === 0
-            ? 'opacity-70'
-            : isModeTransitioning && transitionPhase === 1
-              ? 'opacity-0'
-              : 'opacity-0'
+            ? 'opacity-80'
+            : 'opacity-0'
         }`}
       />
     </main>

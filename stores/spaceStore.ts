@@ -35,7 +35,7 @@ export const useSpaceStore = create<SpaceState>((set, get) => ({
     const floorSweeps = spaceData.sweeps.filter((s) => s.floor === floorNumber);
     useSweepStore.getState().setAvailableSweeps(floorSweeps);
     if (floorSweeps.length > 0) {
-      useSweepStore.getState().setCurrentSweep(floorSweeps[0].id);
+      useSweepStore.getState().startNavigation(floorSweeps[0].id);
     }
   },
 

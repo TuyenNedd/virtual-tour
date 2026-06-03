@@ -82,25 +82,24 @@ export function Minimap() {
       if (currentSweep) {
         const { x, y } = toScreen(currentSweep.position);
         const arrowLength = 10;
-        // Camera yaw: rotation.y in Three.js, negative because canvas Y is flipped
-        // In Three.js, rotation.y = 0 faces -Z. On our minimap, -Z maps to up (decreasing y)
-        const angle = -cameraYaw - Math.PI / 2;
+        const arrowWidth = 5;
+        // Camera yaw: In Three.js, rotation.y = 0 faces -Z
+        const yaw = cameraYaw;
 
-        const tipX = x + Math.cos(angle) * arrowLength;
-        const tipY = y + Math.sin(angle) * arrowLength;
-        const baseLeft = {
-          x: x + Math.cos(angle + 2.5) * 5,
-          y: y + Math.sin(angle + 2.5) * 5,
-        };
-        const baseRight = {
-          x: x + Math.cos(angle - 2.5) * 5,
-          y: y + Math.sin(angle - 2.5) * 5,
-        };
+        // Tip of arrow in direction of yaw
+        const tipX = x + Math.sin(yaw) * arrowLength;
+        const tipY = y - Math.cos(yaw) * arrowLength;
+        // Base points perpendicular to yaw direction
+        const baseAngle = yaw + Math.PI;
+        const baseX1 = x + Math.sin(baseAngle - 0.4) * arrowWidth;
+        const baseY1 = y - Math.cos(baseAngle - 0.4) * arrowWidth;
+        const baseX2 = x + Math.sin(baseAngle + 0.4) * arrowWidth;
+        const baseY2 = y - Math.cos(baseAngle + 0.4) * arrowWidth;
 
         ctx.beginPath();
         ctx.moveTo(tipX, tipY);
-        ctx.lineTo(baseLeft.x, baseLeft.y);
-        ctx.lineTo(baseRight.x, baseRight.y);
+        ctx.lineTo(baseX1, baseY1);
+        ctx.lineTo(baseX2, baseY2);
         ctx.closePath();
         ctx.fillStyle = '#ffffff';
         ctx.fill();

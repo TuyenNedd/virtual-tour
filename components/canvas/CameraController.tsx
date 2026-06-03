@@ -16,6 +16,7 @@ export function CameraController() {
   const startFovRef = useRef(75);
   const transitionStartedRef = useRef(false);
   const phaseAdvancedRef = useRef(false);
+  const lookTargetRef = useRef(new THREE.Vector3());
 
   const { transitionState, isTransitioning, getTargetCameraState } = useCameraTransition();
   const completeTransition = useViewModeStore((s) => s.completeTransition);
@@ -63,7 +64,7 @@ export function CameraController() {
     perspCam.fov = lerp(startFovRef.current, target.fov, eased);
     perspCam.updateProjectionMatrix();
 
-    const lookTarget = new THREE.Vector3(
+    const lookTarget = lookTargetRef.current.set(
       lerp(startTargetRef.current.x, target.target[0], eased),
       lerp(startTargetRef.current.y, target.target[1], eased),
       lerp(startTargetRef.current.z, target.target[2], eased)

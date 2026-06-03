@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { useViewModeStore } from '@/stores/viewModeStore';
+import { useSweepStore } from '@/stores/sweepStore';
 import { useSweepNavigation } from '@/hooks/useSweepNavigation';
 import { ViewMode, Sweep } from '@/lib/types';
 
@@ -25,10 +26,16 @@ function WallSegment({ start, end, height = 3 }: { start: [number, number]; end:
 function DollhousePuck({ sweep, isCurrent }: { sweep: Sweep; isCurrent: boolean }) {
   const [hovered, setHovered] = useState(false);
   const setMode = useViewModeStore((s) => s.setMode);
-  const { navigateToSweep } = useSweepNavigation();
+  const setCurrentSweep = useSweepStore((s) => s.setCurrentSweep);
 
   const scale = hovered ? 1.4 : 1;
   const color = isCurrent ? '#ffffff' : hovered ? '#80d8ff' : '#4fc3f7';
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = 'default';
+    };
+  }, []);
 
   return (
     <mesh
@@ -46,7 +53,8 @@ function DollhousePuck({ sweep, isCurrent }: { sweep: Sweep; isCurrent: boolean 
       }}
       onClick={(e) => {
         e.stopPropagation();
-        navigateToSweep(sweep.id);
+        document.body.style.cursor = 'default';
+        setCurrentSweep(sweep.id);
         setMode(ViewMode.Panorama);
       }}
     >
