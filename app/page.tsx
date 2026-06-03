@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useSpaceStore } from '@/stores/spaceStore';
 import { useSweepStore } from '@/stores/sweepStore';
+import { useViewModeStore } from '@/stores/viewModeStore';
 import { LoadingScreen } from '@/components/ui/LoadingScreen';
 import { ModeButtons } from '@/components/ui/ModeButtons';
 import { FloorSelector } from '@/components/ui/FloorSelector';
@@ -20,6 +21,8 @@ export default function Home() {
   const loadSpace = useSpaceStore((s) => s.loadSpace);
   const isNavigating = useSweepStore((s) => s.isNavigating);
   const completeNavigation = useSweepStore((s) => s.completeNavigation);
+  const isModeTransitioning = useViewModeStore((s) => s.isTransitioning);
+  const transitionPhase = useViewModeStore((s) => s.transitionPhase);
   const [error, setError] = useState<string | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,6 +91,16 @@ export default function Home() {
       <div
         className={`fixed inset-0 z-30 bg-black transition-opacity duration-[400ms] pointer-events-none ${
           isNavigating ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+      {/* Mode transition fade overlay */}
+      <div
+        className={`fixed inset-0 z-30 bg-black pointer-events-none transition-opacity duration-[600ms] ${
+          isModeTransitioning && transitionPhase === 0
+            ? 'opacity-70'
+            : isModeTransitioning && transitionPhase === 1
+              ? 'opacity-0'
+              : 'opacity-0'
         }`}
       />
     </main>

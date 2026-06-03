@@ -1,6 +1,6 @@
 export const DEFAULT_FOV = 75;
 export const DEFAULT_ZOOM = 1;
-export const TRANSITION_DURATION = 1.5;
+export const TRANSITION_DURATION = 1.2;
 export const MIN_POLAR_ANGLE = 0.1;
 export const MAX_POLAR_ANGLE = Math.PI - 0.1;
 export const DOLLHOUSE_CAMERA_DISTANCE = 20;
