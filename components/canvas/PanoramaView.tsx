@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { useThree, useLoader } from '@react-three/fiber';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { useThree, useLoader, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { useViewModeStore } from '@/stores/viewModeStore';
@@ -87,6 +87,22 @@ function PanoramaSweepPucks() {
   );
 }
 
+function CameraYawTracker() {
+  const { camera } = useThree();
+  const setCameraYaw = useViewModeStore((s) => s.setCameraYaw);
+  const lastYawRef = useRef(0);
+
+  useFrame(() => {
+    const yaw = camera.rotation.y;
+    if (Math.abs(yaw - lastYawRef.current) > 0.05) {
+      lastYawRef.current = yaw;
+      setCameraYaw(yaw);
+    }
+  });
+
+  return null;
+}
+
 export function PanoramaView() {
   const currentMode = useViewModeStore((s) => s.currentMode);
   const isTransitioning = useViewModeStore((s) => s.isTransitioning);
@@ -110,6 +126,7 @@ export function PanoramaView() {
 
   return (
     <>
+      <CameraYawTracker />
       <mesh position={[0, 0, 0]} scale={[-1, 1, 1]}>
         <sphereGeometry args={[500, 64, 32]} />
         <meshBasicMaterial map={texture} side={THREE.BackSide} />

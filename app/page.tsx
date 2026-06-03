@@ -92,7 +92,13 @@ export default function Home() {
         className={`fixed inset-0 z-30 bg-black transition-opacity duration-[400ms] pointer-events-none ${
           isNavigating ? 'opacity-100' : 'opacity-0'
         }`}
-      />
+      >
+        {isNavigating && (
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
+          </div>
+        )}
+      </div>
       {/* Mode transition fade overlay */}
       <div
         className={`fixed inset-0 z-30 bg-black pointer-events-none transition-opacity duration-[600ms] ${
