@@ -125,12 +125,18 @@ export function PanoramaView() {
   // prevent memory growth in spaces with many unique panorama images.
   const texture = useLoader(THREE.TextureLoader, panoramaUrl);
 
-  // Ensure camera stays at origin in panorama mode
+  // Reset camera to origin only when first entering panorama mode (not every render)
+  const hasResetRef = useRef(false);
   useEffect(() => {
     if (currentMode === ViewMode.Panorama && !isTransitioning) {
-      camera.position.set(0, 0, 0);
+      if (!hasResetRef.current) {
+        camera.position.set(0, 0, 0);
+        hasResetRef.current = true;
+      }
+    } else {
+      hasResetRef.current = false;
     }
-  }, [currentMode, isTransitioning, camera, currentSweepId]);
+  }, [currentMode, isTransitioning, camera]);
 
   if (currentMode !== ViewMode.Panorama) return null;
 
@@ -145,9 +151,12 @@ export function PanoramaView() {
       <OrbitControls
         enableZoom={false}
         enablePan={false}
-        rotateSpeed={-0.3}
-        target={[0, 0, 0]}
+        enableDamping
+        dampingFactor={0.1}
+        rotateSpeed={-0.5}
+        target={[0, 0, -0.01]}
         enabled={!isTransitioning}
+        makeDefault
       />
     </>
   );
