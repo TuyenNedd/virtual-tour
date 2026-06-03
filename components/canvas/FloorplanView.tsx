@@ -1,13 +1,48 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useThree } from '@react-three/fiber';
-import { MapControls, Line } from '@react-three/drei';
+import { MapControls, Line, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { useViewModeStore } from '@/stores/viewModeStore';
 import { useSweepNavigation } from '@/hooks/useSweepNavigation';
-import { ViewMode } from '@/lib/types';
-import { FLOORPLAN_CAMERA_HEIGHT } from '@/lib/constants';
+import { ViewMode, Sweep } from '@/lib/types';
+import { FLOORPLAN_CAMERA_HEIGHT, ROOM_LABELS } from '@/lib/constants';
+
+function FloorplanPuck({ sweep, isCurrent }: { sweep: Sweep; isCurrent: boolean }) {
+  const [hovered, setHovered] = useState(false);
+  const setMode = useViewModeStore((s) => s.setMode);
+  const { navigateToSweep } = useSweepNavigation();
+
+  const radius = isCurrent ? 0.5 : 0.35;
+  const color = isCurrent ? '#4fc3f7' : hovered ? '#aaa' : '#888';
+  const scale = hovered ? 1.3 : 1;
+
+  return (
+    <mesh
+      position={[sweep.position[0], 0.15, sweep.position[2]]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      scale={[scale, scale, 1]}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = 'default';
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        navigateToSweep(sweep.id);
+        setMode(ViewMode.Panorama);
+      }}
+    >
+      <circleGeometry args={[radius, 32]} />
+      <meshBasicMaterial color={color} />
+    </mesh>
+  );
+}
 
 export function FloorplanView() {
   const currentMode = useViewModeStore((s) => s.currentMode);
@@ -20,7 +55,7 @@ export function FloorplanView() {
       camera.position.set(0, FLOORPLAN_CAMERA_HEIGHT, 0);
       camera.lookAt(0, 0, 0);
       const perspCam = camera as THREE.PerspectiveCamera;
-      perspCam.fov = 20;
+      perspCam.fov = 6;
       perspCam.updateProjectionMatrix();
     }
   }, [currentMode, isTransitioning, camera]);
@@ -48,32 +83,58 @@ export function FloorplanView() {
 
   return (
     <>
-      <ambientLight intensity={0.6} />
+      <ambientLight intensity={0.8} />
 
-      <gridHelper args={[30, 30, '#333', '#222']} />
+      {/* Grid overlay */}
+      <gridHelper args={[20, 20, '#333', '#222']} />
 
-      {availableSweeps.map((sweep) => (
-        <mesh
-          key={sweep.id}
-          position={[sweep.position[0], 0.1, sweep.position[2]]}
-          rotation={[-Math.PI / 2, 0, 0]}
-        >
-          <circleGeometry args={[sweep.id === currentSweepId ? 0.5 : 0.3, 32]} />
-          <meshBasicMaterial
-            color={sweep.id === currentSweepId ? '#4fc3f7' : '#888'}
-          />
-        </mesh>
-      ))}
+      {/* Floor outline rectangle matching house shape */}
+      <Line
+        points={[
+          new THREE.Vector3(-6, 0.05, -6),
+          new THREE.Vector3(6, 0.05, -6),
+          new THREE.Vector3(6, 0.05, 6),
+          new THREE.Vector3(-6, 0.05, 6),
+          new THREE.Vector3(-6, 0.05, -6),
+        ]}
+        color="#666"
+        lineWidth={2}
+      />
 
+      {/* Connection lines between neighbors */}
       {connections.map((points, i) => (
         <Line
           key={i}
           points={[points[0], points[1]]}
           color="#4fc3f7"
-          lineWidth={1}
+          lineWidth={1.5}
           opacity={0.5}
           transparent
         />
+      ))}
+
+      {/* Sweep circles */}
+      {availableSweeps.map((sweep) => (
+        <FloorplanPuck
+          key={sweep.id}
+          sweep={sweep}
+          isCurrent={sweep.id === currentSweepId}
+        />
+      ))}
+
+      {/* Room labels */}
+      {ROOM_LABELS.map((label) => (
+        <Text
+          key={label.name}
+          position={[label.position[0], 0.2, label.position[2]]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          fontSize={0.5}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {label.name}
+        </Text>
       ))}
 
       <MapControls
