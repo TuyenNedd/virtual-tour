@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import { useViewModeStore } from '@/stores/viewModeStore';
 import { useSweepStore } from '@/stores/sweepStore';
 import { ViewMode, Sweep } from '@/lib/types';
@@ -28,14 +28,46 @@ type NavPhase = typeof NAV_PHASE_DOLLY | typeof NAV_PHASE_FADEIN | typeof NAV_PH
 // Sweep Puck (clickable navigation marker)
 // ============================================================
 
+// Animated pulse ring around puck
+function PuckRing({ radius, hovered }: { radius: number; hovered: boolean }) {
+  const ringRef = useRef<THREE.Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (!ringRef.current) return;
+    const mat = ringRef.current.material as THREE.MeshBasicMaterial;
+    // Pulse opacity animation
+    const time = performance.now() * 0.003;
+    const pulse = 0.3 + Math.sin(time) * 0.2;
+    mat.opacity = hovered ? 0.8 : pulse;
+    // Scale pulse
+    const scalePulse = hovered ? 1.6 : 1.0 + Math.sin(time) * 0.15;
+    ringRef.current.scale.set(scalePulse, scalePulse, 1);
+  });
+
+  return (
+    <mesh ref={ringRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+      <ringGeometry args={[radius * 0.9, radius * 1.3, 32]} />
+      <meshBasicMaterial
+        color={hovered ? '#80d8ff' : SWEEP_PUCK_COLOR}
+        transparent
+        opacity={0.4}
+        toneMapped={false}
+        side={THREE.DoubleSide}
+      />
+    </mesh>
+  );
+}
+
 function PanoramaSweepPuck({
   sweep,
   currentSweep,
   onNavigate,
+  sweepLabel,
 }: {
   sweep: Sweep;
   currentSweep: Sweep;
   onNavigate: (sweepId: string, direction: THREE.Vector3) => void;
+  sweepLabel?: string;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -54,7 +86,7 @@ function PanoramaSweepPuck({
   }
 
   const scale = hovered ? 1.4 : 1.0;
-  const color = hovered ? '#80d8ff' : SWEEP_PUCK_COLOR;
+  const color = hovered ? '#ffffff' : SWEEP_PUCK_COLOR;
 
   useEffect(() => {
     return () => {
@@ -63,30 +95,49 @@ function PanoramaSweepPuck({
   }, []);
 
   return (
-    <mesh
-      position={[px, -1.5, pz]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      scale={[scale, scale, 1]}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        document.body.style.cursor = 'default';
-      }}
-      onClick={(e) => {
-        e.stopPropagation();
-        document.body.style.cursor = 'default';
-        // Pass the direction vector toward this puck
-        const dir = new THREE.Vector3(px, 0, pz).normalize();
-        onNavigate(sweep.id, dir);
-      }}
-    >
-      <circleGeometry args={[0.3, 32]} />
-      <meshBasicMaterial color={color} transparent opacity={0.9} toneMapped={false} />
-    </mesh>
+    <group position={[px, -1.5, pz]}>
+      {/* Pulse ring */}
+      <PuckRing radius={0.3} hovered={hovered} />
+
+      {/* Main puck disc */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={[scale, scale, 1]}
+        onPointerOver={(e) => {
+          e.stopPropagation();
+          setHovered(true);
+          document.body.style.cursor = 'pointer';
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = 'default';
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          document.body.style.cursor = 'default';
+          const dir = new THREE.Vector3(px, 0, pz).normalize();
+          onNavigate(sweep.id, dir);
+        }}
+      >
+        <circleGeometry args={[0.3, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={0.9} toneMapped={false} />
+      </mesh>
+
+      {/* Center dot */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <circleGeometry args={[0.08, 16]} />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </mesh>
+
+      {/* Tooltip on hover */}
+      {hovered && sweepLabel && (
+        <Html position={[0, 0.6, 0]} center style={{ pointerEvents: 'none' }}>
+          <div className="bg-black/80 text-white text-xs px-3 py-1.5 rounded-full whitespace-nowrap backdrop-blur-sm border border-white/20 shadow-lg">
+            {sweepLabel}
+          </div>
+        </Html>
+      )}
+    </group>
   );
 }
 
@@ -105,6 +156,15 @@ function PanoramaSweepPucks({
 
   const neighbors = getNeighbors();
 
+  // Simple label lookup based on panorama filename
+  const getLabel = (sweep: Sweep) => {
+    const url = sweep.panoramaUrl || '';
+    if (url.includes('medieval_cafe')) return 'Medieval Cafe';
+    if (url.includes('qwantani_patio')) return 'Qwantani Patio';
+    if (url.includes('sundowner_deck')) return 'Sundowner Deck';
+    return `Point ${sweep.id.replace('sweep-', '')}`;
+  };
+
   return (
     <>
       {neighbors.map((neighbor) => (
@@ -113,6 +173,7 @@ function PanoramaSweepPucks({
           sweep={neighbor}
           currentSweep={currentSweep}
           onNavigate={onNavigate}
+          sweepLabel={getLabel(neighbor)}
         />
       ))}
     </>
@@ -301,6 +362,16 @@ export function PanoramaView() {
   return (
     <>
       <CameraYawTracker />
+
+      {/* Loading indicator during navigation */}
+      {navActive && (
+        <Html center position={[0, 0, -2]} style={{ pointerEvents: 'none' }}>
+          <div className="flex items-center gap-2 bg-black/60 text-white text-sm px-4 py-2 rounded-full backdrop-blur-sm">
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span>Loading...</span>
+          </div>
+        </Html>
+      )}
 
       {/* Current panorama sphere */}
       <mesh position={[0, 0, 0]} scale={[-1, 1, 1]}>
