@@ -360,6 +360,8 @@ export function PanoramaView() {
   });
 
   if (currentMode !== ViewMode.Panorama) return null;
+  if (!currentSweepId || !currentTexture) return null;
+
 
   return (
     <>
