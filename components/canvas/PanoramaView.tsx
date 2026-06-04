@@ -25,6 +25,85 @@ const FOV_ZOOM = 40;         // FOV narrows to create zoom effect
 type NavPhase = typeof NAV_PHASE_DOLLY | typeof NAV_PHASE_FADEIN | typeof NAV_PHASE_IDLE;
 
 // ============================================================
+// FOV Zoom (scroll/pinch to zoom in panorama)
+// ============================================================
+
+const MIN_FOV = 30;
+const MAX_FOV = 90;
+const ZOOM_SPEED = 0.05;
+
+function PanoramaZoom({ enabled }: { enabled: boolean }) {
+  const { camera, gl } = useThree();
+
+  useEffect(() => {
+    if (!enabled) return;
+    const canvas = gl.domElement;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const perspCam = camera as THREE.PerspectiveCamera;
+      const delta = e.deltaY > 0 ? 1 : -1;
+      perspCam.fov = THREE.MathUtils.clamp(
+        perspCam.fov + delta * 3,
+        MIN_FOV,
+        MAX_FOV
+      );
+      perspCam.updateProjectionMatrix();
+    };
+
+    // Double-click/tap to reset zoom
+    const handleDoubleClick = () => {
+      const perspCam = camera as THREE.PerspectiveCamera;
+      perspCam.fov = 75; // DEFAULT_FOV
+      perspCam.updateProjectionMatrix();
+    };
+
+    // Pinch zoom for mobile
+    let lastPinchDist = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        lastPinchDist = Math.sqrt(dx * dx + dy * dy);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const delta = (lastPinchDist - dist) * ZOOM_SPEED;
+        lastPinchDist = dist;
+
+        const perspCam = camera as THREE.PerspectiveCamera;
+        perspCam.fov = THREE.MathUtils.clamp(
+          perspCam.fov + delta,
+          MIN_FOV,
+          MAX_FOV
+        );
+        perspCam.updateProjectionMatrix();
+      }
+    };
+
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: true });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('dblclick', handleDoubleClick);
+
+    return () => {
+      canvas.removeEventListener('wheel', handleWheel);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('dblclick', handleDoubleClick);
+    };
+  }, [enabled, camera, gl]);
+
+  return null;
+}
+
+// ============================================================
 // Sweep Puck (clickable navigation marker)
 // ============================================================
 
@@ -401,7 +480,10 @@ export function PanoramaView() {
         target={[0, 0, -0.01]}
         enabled={!isTransitioning && !navActive}
         makeDefault
+        touches={{ ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_ROTATE }}
       />
+      {/* FOV zoom via scroll/pinch */}
+      <PanoramaZoom enabled={!isTransitioning && !navActive} />
     </>
   );
 }
