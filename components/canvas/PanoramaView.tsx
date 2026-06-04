@@ -233,14 +233,17 @@ export function PanoramaView() {
   const currentSweep = sweeps[currentSweepId];
   const panoramaUrl = currentSweep?.panoramaUrl || '/panoramas/sundowner_deck.jpg';
 
-  // Load initial texture
+  // Load texture whenever panoramaUrl changes (including initial mount)
+  const loadedUrlRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!panoramaUrl) return;
+    // Skip if same URL already loaded or if navigating (handled by nav logic)
+    if (!panoramaUrl || loadedUrlRef.current === panoramaUrl || navActive) return;
+    loadedUrlRef.current = panoramaUrl;
     textureLoader.load(panoramaUrl, (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
       setCurrentTexture(tex);
     });
-  }, [panoramaUrl, textureLoader]);
+  }, [panoramaUrl, textureLoader, navActive]);
 
   // Reset camera on entering panorama mode or after navigation completes
   const isNavigating = useSweepStore((s) => s.isNavigating);
@@ -382,6 +385,7 @@ export function PanoramaView() {
           side={THREE.BackSide}
           transparent
           opacity={1}
+          color={currentTexture ? '#ffffff' : '#000000'}
         />
       </mesh>
 
