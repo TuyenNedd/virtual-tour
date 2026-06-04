@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { OrbitControls, Html } from '@react-three/drei';
@@ -224,26 +224,24 @@ export function PanoramaView() {
   // Sphere materials for crossfade
   const currentMatRef = useRef<THREE.MeshBasicMaterial>(null);
   const nextMatRef = useRef<THREE.MeshBasicMaterial>(null);
-
-  // Texture loading
-  const textureLoader = useMemo(() => new THREE.TextureLoader(), []);
   const [currentTexture, setCurrentTexture] = useState<THREE.Texture | null>(null);
   const [nextTexture, setNextTexture] = useState<THREE.Texture | null>(null);
+  const [textureReady, setTextureReady] = useState(false);
 
   const currentSweep = sweeps[currentSweepId];
   const panoramaUrl = currentSweep?.panoramaUrl || '/panoramas/sundowner_deck.jpg';
 
-  // Load texture whenever panoramaUrl changes (including initial mount)
-  const loadedUrlRef = useRef<string | null>(null);
+  // Load texture whenever panoramaUrl changes - simple and direct
   useEffect(() => {
-    // Skip if same URL already loaded or if navigating (handled by nav logic)
-    if (!panoramaUrl || loadedUrlRef.current === panoramaUrl || navActive) return;
-    loadedUrlRef.current = panoramaUrl;
-    textureLoader.load(panoramaUrl, (tex) => {
+    if (!panoramaUrl || navActive) return;
+    setTextureReady(false);
+    const loader = new THREE.TextureLoader();
+    loader.load(panoramaUrl, (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace;
       setCurrentTexture(tex);
+      setTextureReady(true);
     });
-  }, [panoramaUrl, textureLoader, navActive]);
+  }, [panoramaUrl, navActive]);
 
   // Reset camera on entering panorama mode or after navigation completes
   const isNavigating = useSweepStore((s) => s.isNavigating);
@@ -280,7 +278,8 @@ export function PanoramaView() {
     // Preload next panorama texture
     const targetSweep = sweeps[sweepId];
     if (targetSweep) {
-      textureLoader.load(targetSweep.panoramaUrl, (tex) => {
+      const loader = new THREE.TextureLoader();
+      loader.load(targetSweep.panoramaUrl, (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         setNextTexture(tex);
       });
