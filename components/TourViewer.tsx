@@ -3,17 +3,15 @@ import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { useViewStore } from "@/stores/viewStore";
-import { loadSpace } from "@/lib/space";
+import { loadSpace, fallbackSpace } from "@/lib/space";
 import { isWebGLAvailable } from "@/lib/webgl";
-import { INSIDE_FOV } from "@/lib/constants";
+import { INSIDE_FOV, DRACO_PATH, FALLBACK_MODEL_URL } from "@/lib/constants";
 import { Scene } from "./canvas/Scene";
 import { LoadingScreen } from "./ui/LoadingScreen";
 import { ModeToggle } from "./ui/ModeToggle";
 import { ViewControls } from "./ui/ViewControls";
 import { FloorSelector } from "./ui/FloorSelector";
 import { Minimap } from "./ui/Minimap";
-
-const DRACO_PATH = "/draco/";
 
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);
@@ -26,7 +24,15 @@ export function TourViewer() {
         setSpace(s);
         useGLTF.preload(s.modelUrl, DRACO_PATH);
       })
-      .catch((e) => setError(String(e)));
+      .catch((e) => {
+        try {
+          const fb = fallbackSpace(FALLBACK_MODEL_URL, [0, 0, 0]);
+          setSpace(fb);
+          useGLTF.preload(fb.modelUrl, DRACO_PATH);
+        } catch {
+          setError(String(e));
+        }
+      });
   }, [setSpace]);
 
   if (error) {
