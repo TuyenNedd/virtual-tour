@@ -18,3 +18,6 @@ export const PUCK_COLOR = "#ffffff";
 export const PUCK_OPACITY = 0.85;
 
 export const DEFAULT_MODE: ViewMode = "inside";
+
+export const DRACO_PATH = "/draco/";
+export const FALLBACK_MODEL_URL = "/model/space.glb";

@@ -38,3 +38,12 @@ next-env.d.ts
 
 # kiro local config
 .kiro/
+
+# editor
+.vscode/
+
+# raw HM3D source assets (large; supplied locally, see README).
+# The served/compressed model (public/model/space.glb) and public/data are tracked.
+public/hm3d-example-glb/
+public/hm3d-example-obj+mtl/
+public/hm3d-example-habitat/

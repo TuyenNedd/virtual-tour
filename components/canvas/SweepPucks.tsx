@@ -1,17 +1,18 @@
 "use client";
 import { useViewStore } from "@/stores/viewStore";
-import { sweepsOnFloor } from "@/lib/sweepGraph";
-import { PUCK_COLOR, PUCK_OPACITY } from "@/lib/constants";
+import { neighborsOf } from "@/lib/sweepGraph";
+import { PUCK_COLOR, PUCK_OPACITY, SWEEP_EYE_HEIGHT } from "@/lib/constants";
 
 export function SweepPucks() {
   const space = useViewStore((s) => s.space);
   const mode = useViewStore((s) => s.mode);
-  const floorId = useViewStore((s) => s.floorId);
   const currentSweepId = useViewStore((s) => s.currentSweepId);
   const goToSweep = useViewStore((s) => s.goToSweep);
 
   if (!space || mode !== "inside") return null;
-  const visible = sweepsOnFloor(space.sweeps, floorId);
+  const visible = currentSweepId
+    ? neighborsOf(space.sweeps, currentSweepId)
+    : [];
 
   return (
     <group>
@@ -21,7 +22,7 @@ export function SweepPucks() {
         return (
           <mesh
             key={sweep.id}
-            position={[x, y - 1.4, z]}
+            position={[x, y - SWEEP_EYE_HEIGHT + 0.1, z]}
             rotation={[-Math.PI / 2, 0, 0]}
             onClick={(e) => {
               e.stopPropagation();
