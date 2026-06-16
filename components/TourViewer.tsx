@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { useViewStore } from "@/stores/viewStore";
 import { loadSpace } from "@/lib/space";
+import { isWebGLAvailable } from "@/lib/webgl";
 import { INSIDE_FOV } from "@/lib/constants";
 import { Scene } from "./canvas/Scene";
 import { LoadingScreen } from "./ui/LoadingScreen";
@@ -38,6 +39,14 @@ export function TourViewer() {
         >
           Retry
         </button>
+      </div>
+    );
+  }
+
+  if (typeof window !== "undefined" && !isWebGLAvailable()) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-neutral-900 text-white">
+        Your browser does not support WebGL.
       </div>
     );
   }
