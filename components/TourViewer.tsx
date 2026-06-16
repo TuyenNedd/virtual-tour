@@ -1,0 +1,71 @@
+"use client";
+import { useEffect, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { useViewStore } from "@/stores/viewStore";
+import { loadSpace } from "@/lib/space";
+import { INSIDE_FOV } from "@/lib/constants";
+import { Scene } from "./canvas/Scene";
+import { LoadingScreen } from "./ui/LoadingScreen";
+import { ModeToggle } from "./ui/ModeToggle";
+import { ViewControls } from "./ui/ViewControls";
+import { FloorSelector } from "./ui/FloorSelector";
+import { Minimap } from "./ui/Minimap";
+
+const DRACO_PATH = "/draco/";
+
+export function TourViewer() {
+  const setSpace = useViewStore((s) => s.setSpace);
+  const space = useViewStore((s) => s.space);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadSpace()
+      .then((s) => {
+        setSpace(s);
+        useGLTF.preload(s.modelUrl, DRACO_PATH);
+      })
+      .catch((e) => setError(String(e)));
+  }, [setSpace]);
+
+  if (error) {
+    return (
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 bg-neutral-900 text-white">
+        <p>Could not load the tour.</p>
+        <button
+          className="rounded bg-white px-4 py-2 text-neutral-900"
+          onClick={() => location.reload()}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-screen w-screen overflow-hidden bg-neutral-900">
+      <Canvas
+        camera={{
+          fov: INSIDE_FOV,
+          position: [0, 1.5, 0],
+          near: 0.05,
+          far: 1000,
+        }}
+      >
+        <Scene />
+      </Canvas>
+      {space && (
+        <>
+          <div className="absolute left-4 top-4 z-40 rounded-md bg-black/45 px-3 py-1.5 text-sm text-white">
+            Virtual Tour
+          </div>
+          <Minimap />
+          <FloorSelector />
+          <ModeToggle />
+          <ViewControls />
+        </>
+      )}
+      <LoadingScreen />
+    </div>
+  );
+}
