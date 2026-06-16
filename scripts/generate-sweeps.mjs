@@ -48,12 +48,32 @@ for (let x = box.min.x; x <= box.max.x; x += SPACING) {
   }
 }
 
+const LOS_EPSILON = 0.15;
+const losRay = new THREE.Raycaster();
+
+function hasLineOfSight(a, b) {
+  const origin = new THREE.Vector3(a.position[0], a.position[1], a.position[2]);
+  const target = new THREE.Vector3(b.position[0], b.position[1], b.position[2]);
+  const dir = new THREE.Vector3().subVectors(target, origin);
+  const dist = dir.length();
+  if (dist === 0) return true;
+  dir.normalize();
+  losRay.set(origin, dir);
+  losRay.far = dist;
+  const hits = losRay.intersectObjects(meshes, true);
+  // Occluded if geometry is hit before reaching B (minus epsilon tolerance).
+  if (hits.length && hits[0].distance < dist - LOS_EPSILON) return false;
+  return true;
+}
+
 for (const a of sweeps) {
   for (const b of sweeps) {
     if (a === b) continue;
     const dx = a.position[0] - b.position[0];
     const dz = a.position[2] - b.position[2];
-    if (Math.hypot(dx, dz) <= NEIGHBOR_R) a.neighbors.push(b.id);
+    if (Math.hypot(dx, dz) > NEIGHBOR_R) continue;
+    if (!hasLineOfSight(a, b)) continue;
+    a.neighbors.push(b.id);
   }
 }
 
