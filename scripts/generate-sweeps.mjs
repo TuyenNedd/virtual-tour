@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { loadGltf } from "node-three-gltf";
 
 const MODEL_FILE = "public/hm3d-example-glb/00770-NBg5UqG3di3/NBg5UqG3di3.glb";
-const MODEL_URL = "/hm3d-example-glb/00770-NBg5UqG3di3/NBg5UqG3di3.glb";
+const MODEL_URL = "/model/space.glb";
 const OUT = "public/data/space.json";
 
 const SPACING = 1.2;
