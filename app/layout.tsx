@@ -1,9 +1,8 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Virtual Tour Viewer',
-  description: '3D Virtual Tour Viewer with panorama, dollhouse, and floorplan modes',
+  title: "Virtual Tour Viewer",
 };
 
 export default function RootLayout({
@@ -13,9 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-black text-white antialiased">
-        {children}
-      </body>
+      <body className="">{children}</body>
     </html>
   );
 }
