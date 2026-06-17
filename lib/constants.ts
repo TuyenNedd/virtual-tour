@@ -21,3 +21,7 @@ export const DEFAULT_MODE: ViewMode = "inside";
 
 export const DRACO_PATH = "/draco/";
 export const FALLBACK_MODEL_URL = "/model/space.glb";
+
+// HM3D source meshes are Z-up; rotate -90° about X to present them Y-up.
+// The sweep generator (scripts/generate-sweeps.mjs) bakes the same rotation.
+export const MODEL_UP_FIX_ROTATION_X = -Math.PI / 2;
