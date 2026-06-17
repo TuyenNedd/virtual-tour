@@ -14,6 +14,9 @@ const NEIGHBOR_R = 2.2;
 
 const gltf = await loadGltf(resolve(MODEL_FILE));
 const scene = gltf.scene;
+// HM3D meshes are Z-up; rotate to Y-up so the whole (Y-up) pipeline is consistent.
+// The renderer (SpaceModel) applies the SAME rotation, so sweep coords match the model.
+scene.rotation.x = -Math.PI / 2;
 const meshes = [];
 scene.updateMatrixWorld(true);
 scene.traverse((o) => o.isMesh && meshes.push(o));
@@ -21,23 +24,28 @@ scene.traverse((o) => o.isMesh && meshes.push(o));
 const box = new THREE.Box3().setFromObject(scene);
 const ray = new THREE.Raycaster();
 const down = new THREE.Vector3(0, -1, 0);
-const up = new THREE.Vector3(0, 1, 0);
 
-function hit(origin, dir) {
-  ray.set(origin, dir);
-  const hits = ray.intersectObjects(meshes, true);
-  return hits.length ? hits[0] : null;
+// All downward intersections at (x,z), sorted nearest->farthest from above.
+function columnHits(x, z) {
+  ray.set(new THREE.Vector3(x, box.max.y + 1, z), down);
+  ray.far = Infinity;
+  return ray.intersectObjects(meshes, true);
 }
 
 const sweeps = [];
 let i = 0;
 for (let x = box.min.x; x <= box.max.x; x += SPACING) {
   for (let z = box.min.z; z <= box.max.z; z += SPACING) {
-    const floorHit = hit(new THREE.Vector3(x, box.max.y + 1, z), down);
-    if (!floorHit) continue;
-    const fy = floorHit.point.y;
-    const ceilHit = hit(new THREE.Vector3(x, fy + 0.1, z), up);
-    const clearance = ceilHit ? ceilHit.point.y - fy : Infinity;
+    const hits = columnHits(x, z);
+    if (hits.length === 0) continue;
+    // Floor = lowest surface in this column (robust against open tops / no ceiling).
+    const fy = hits[hits.length - 1].point.y;
+    // Headroom = gap to the next surface above the floor (Infinity if open above).
+    const above = hits
+      .map((h) => h.point.y)
+      .filter((y) => y > fy + 0.1)
+      .sort((a, b) => a - b);
+    const clearance = above.length ? above[0] - fy : Infinity;
     if (clearance < HEADROOM) continue;
     sweeps.push({
       id: `s${i++}`,
