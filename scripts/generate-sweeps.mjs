@@ -59,6 +59,35 @@ for (let x = box.min.x; x <= box.max.x; x += SPACING) {
 const LOS_EPSILON = 0.15;
 const losRay = new THREE.Raycaster();
 
+// Keep only sweeps on the dominant (main) floor level. Some columns' lowest
+// surface is a raised object (table/ledge); bucket floor heights and keep the
+// band with the most sweeps so we don't scatter pucks onto furniture.
+const FLOOR_BAND = 0.6; // metres around the main floor level
+function mainFloorFilter(list) {
+  if (list.length === 0) return list;
+  const buckets = new Map();
+  for (const s of list) {
+    const fy = s.position[1] - EYE;
+    const key = Math.round(fy / 0.5) * 0.5;
+    buckets.set(key, (buckets.get(key) ?? 0) + 1);
+  }
+  let mainKey = 0;
+  let best = -1;
+  for (const [key, count] of buckets) {
+    if (count > best) {
+      best = count;
+      mainKey = key;
+    }
+  }
+  return list.filter(
+    (s) => Math.abs(s.position[1] - EYE - mainKey) <= FLOOR_BAND,
+  );
+}
+
+const kept = mainFloorFilter(sweeps);
+sweeps.length = 0;
+sweeps.push(...kept);
+
 function hasLineOfSight(a, b) {
   const origin = new THREE.Vector3(a.position[0], a.position[1], a.position[2]);
   const target = new THREE.Vector3(b.position[0], b.position[1], b.position[2]);

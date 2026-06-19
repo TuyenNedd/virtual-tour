@@ -11,6 +11,7 @@ export function Minimap() {
   const floorId = useViewStore((s) => s.floorId);
   const currentSweepId = useViewStore((s) => s.currentSweepId);
   const goToSweep = useViewStore((s) => s.goToSweep);
+  const facing = useViewStore((s) => s.facing);
 
   const data = useMemo(() => {
     if (!space) return null;
@@ -31,6 +32,12 @@ export function Minimap() {
   }, [space, floorId]);
 
   if (!data) return null;
+
+  const current = data.sweeps.find((s) => s.id === currentSweepId);
+  const cur = current
+    ? data.project(current.position[0], current.position[2])
+    : null;
+  const facingDeg = (facing * 180) / Math.PI;
 
   return (
     <div
@@ -53,6 +60,15 @@ export function Minimap() {
             />
           );
         })}
+        {/* heading arrow at the current sweep (points where the camera faces) */}
+        {cur && (
+          <polygon
+            points="11,0 -4,-5 -4,5"
+            fill="#4ade80"
+            transform={`translate(${cur.cx} ${cur.cy}) rotate(${facingDeg})`}
+            style={{ pointerEvents: "none" }}
+          />
+        )}
       </svg>
     </div>
   );

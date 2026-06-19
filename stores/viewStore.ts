@@ -8,11 +8,13 @@ interface ViewState {
   currentSweepId: string | null;
   floorId: number;
   isTransitioning: boolean;
+  facing: number; // screen-space heading (radians) for the minimap arrow
   setSpace: (s: SpaceData) => void;
   setMode: (m: ViewMode) => void;
   goToSweep: (id: string) => void;
   setFloor: (id: number) => void;
   setTransitioning: (v: boolean) => void;
+  setFacing: (f: number) => void;
 }
 
 export const useViewStore = create<ViewState>((set) => ({
@@ -21,6 +23,7 @@ export const useViewStore = create<ViewState>((set) => ({
   currentSweepId: null,
   floorId: 0,
   isTransitioning: false,
+  facing: 0,
   setSpace: (space) =>
     set({
       space,
@@ -31,4 +34,5 @@ export const useViewStore = create<ViewState>((set) => ({
   goToSweep: (currentSweepId) => set({ currentSweepId, mode: "inside" }),
   setFloor: (floorId) => set({ floorId }),
   setTransitioning: (isTransitioning) => set({ isTransitioning }),
+  setFacing: (facing) => set({ facing }),
 }));
