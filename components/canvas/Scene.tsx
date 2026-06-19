@@ -11,6 +11,7 @@ import { SpaceModel } from "./SpaceModel";
 import { SweepPucks } from "./SweepPucks";
 import { CameraController } from "./CameraController";
 import { FirstPersonLook } from "./FirstPersonLook";
+import { Tags } from "./Tags";
 
 export function Scene() {
   const space = useViewStore((s) => s.space);
@@ -29,6 +30,7 @@ export function Scene() {
         <SpaceModel url={space.modelUrl} />
       </Suspense>
       <SweepPucks />
+      <Tags />
 
       {/* Perspective camera for inside + dollhouse; orthographic for floorplan. */}
       <PerspectiveCamera

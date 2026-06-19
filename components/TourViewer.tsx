@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { useViewStore } from "@/stores/viewStore";
 import { loadSpace, fallbackSpace } from "@/lib/space";
+import { loadTags } from "@/lib/tags";
 import { isWebGLAvailable } from "@/lib/webgl";
 import { INSIDE_FOV, DRACO_PATH, FALLBACK_MODEL_URL } from "@/lib/constants";
 import { Scene } from "./canvas/Scene";
@@ -12,9 +13,11 @@ import { ModeToggle } from "./ui/ModeToggle";
 import { ViewControls } from "./ui/ViewControls";
 import { FloorSelector } from "./ui/FloorSelector";
 import { Minimap } from "./ui/Minimap";
+import { TagPanel } from "./ui/TagPanel";
 
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);
+  const setTags = useViewStore((s) => s.setTags);
   const space = useViewStore((s) => s.space);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +36,8 @@ export function TourViewer() {
           setError(String(e));
         }
       });
-  }, [setSpace]);
+    loadTags().then(setTags);
+  }, [setSpace, setTags]);
 
   if (error) {
     return (
@@ -78,6 +82,7 @@ export function TourViewer() {
           <FloorSelector />
           <ModeToggle />
           <ViewControls />
+          <TagPanel />
         </>
       )}
       <LoadingScreen />

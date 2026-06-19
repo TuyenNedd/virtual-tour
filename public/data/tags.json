@@ -1,0 +1,23 @@
+[
+  {
+    "id": "t1",
+    "position": [-24.551, 1.7, 0.579],
+    "title": "Entrance",
+    "body": "Starting point of the tour. Hardwood parquet flooring throughout.",
+    "color": "#22d3ee"
+  },
+  {
+    "id": "t2",
+    "position": [-5.351, 1.7, 10.179],
+    "title": "Main room",
+    "body": "Spacious central room with classic moulded wall panelling.",
+    "color": "#f59e0b"
+  },
+  {
+    "id": "t3",
+    "position": [9.049, 1.7, 12.579],
+    "title": "Far corner",
+    "body": "End of the walkable area in this capture.",
+    "color": "#a78bfa"
+  }
+]
