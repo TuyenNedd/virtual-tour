@@ -22,6 +22,7 @@ export function CameraController() {
   const currentSweepId = useViewStore((s) => s.currentSweepId);
   const setTransitioning = useViewStore((s) => s.setTransitioning);
   const setFacing = useViewStore((s) => s.setFacing);
+  const insideFov = useViewStore((s) => s.insideFov);
 
   const bounds = useRef({
     center: new THREE.Vector3(),
@@ -86,7 +87,7 @@ export function CameraController() {
       // inside: move to the sweep; rotation is owned by FirstPersonLook.
       goalPos.current.copy(sp);
       goalTarget.current.set(center.x, sp.y, center.z);
-      goalFov.current = INSIDE_FOV;
+      goalFov.current = insideFov;
       // On first entry into inside mode, face the room center once so the
       // initial view is sensible. On subsequent sweep moves keep the heading.
       if (prevMode.current !== "inside") {
