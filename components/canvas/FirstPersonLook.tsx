@@ -40,9 +40,14 @@ export function FirstPersonLook({ enabled }: { enabled: boolean }) {
       const dx = e.clientX - last.current.x;
       const dy = e.clientY - last.current.y;
       last.current = { x: e.clientX, y: e.clientY };
-      yaw.current -= dx * SENSITIVITY;
-      pitch.current -= dy * SENSITIVITY;
-      pitch.current = Math.max(-PITCH_LIMIT, Math.min(PITCH_LIMIT, pitch.current));
+      // "grab the world" feel (like Matterport): dragging right turns the view
+      // left so the scene follows the cursor; dragging down looks up.
+      yaw.current += dx * SENSITIVITY;
+      pitch.current += dy * SENSITIVITY;
+      pitch.current = Math.max(
+        -PITCH_LIMIT,
+        Math.min(PITCH_LIMIT, pitch.current),
+      );
     };
     const onUp = () => {
       dragging.current = false;
