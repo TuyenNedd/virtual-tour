@@ -1,15 +1,25 @@
 "use client";
 import { Suspense } from "react";
-import { OrbitControls } from "@react-three/drei";
+import {
+  OrbitControls,
+  PerspectiveCamera,
+  OrthographicCamera,
+} from "@react-three/drei";
 import { useViewStore } from "@/stores/viewStore";
+import { INSIDE_FOV } from "@/lib/constants";
 import { SpaceModel } from "./SpaceModel";
 import { SweepPucks } from "./SweepPucks";
 import { CameraController } from "./CameraController";
+import { FirstPersonLook } from "./FirstPersonLook";
 
 export function Scene() {
   const space = useViewStore((s) => s.space);
   const mode = useViewStore((s) => s.mode);
+  const isTransitioning = useViewStore((s) => s.isTransitioning);
   if (!space) return null;
+
+  const isInside = mode === "inside";
+  const isFloorplan = mode === "floorplan";
 
   return (
     <>
@@ -19,14 +29,33 @@ export function Scene() {
         <SpaceModel url={space.modelUrl} />
       </Suspense>
       <SweepPucks />
-      {/* OrbitControls registers as default; CameraController drives it during transitions.
-          inside: rotate-only look-around; dollhouse: orbit+zoom; floorplan: pan+zoom, no rotate. */}
-      <OrbitControls
-        makeDefault
-        enablePan={mode === "floorplan"}
-        enableZoom={mode !== "inside"}
-        enableRotate={mode !== "floorplan"}
+
+      {/* Perspective camera for inside + dollhouse; orthographic for floorplan. */}
+      <PerspectiveCamera
+        makeDefault={!isFloorplan}
+        fov={INSIDE_FOV}
+        position={[0, 1.5, 0]}
+        near={0.05}
+        far={2000}
       />
+      <OrthographicCamera
+        makeDefault={isFloorplan}
+        position={[0, 100, 0]}
+        near={0.1}
+        far={4000}
+      />
+
+      {/* Inside = first-person look-in-place; dollhouse/floorplan = OrbitControls. */}
+      {isInside ? (
+        <FirstPersonLook enabled={!isTransitioning} />
+      ) : (
+        <OrbitControls
+          makeDefault
+          enablePan={isFloorplan}
+          enableZoom
+          enableRotate={!isFloorplan}
+        />
+      )}
       <CameraController />
     </>
   );

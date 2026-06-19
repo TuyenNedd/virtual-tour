@@ -20,7 +20,7 @@ export function SweepPucks() {
         const isCurrent = sweep.id === currentSweepId;
         const [x, y, z] = sweep.position;
         return (
-          <mesh
+          <group
             key={sweep.id}
             position={[x, y - SWEEP_EYE_HEIGHT + 0.1, z]}
             rotation={[-Math.PI / 2, 0, 0]}
@@ -31,14 +31,22 @@ export function SweepPucks() {
             onPointerOver={() => (document.body.style.cursor = "pointer")}
             onPointerOut={() => (document.body.style.cursor = "default")}
           >
-            <ringGeometry args={[0.18, 0.26, 32]} />
-            <meshBasicMaterial
-              color={PUCK_COLOR}
-              transparent
-              opacity={isCurrent ? 0.3 : PUCK_OPACITY}
-              depthWrite={false}
-            />
-          </mesh>
+            {/* invisible filled disc = full click/hover hit area (the ring's hole isn't hittable) */}
+            <mesh>
+              <circleGeometry args={[0.3, 32]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+            {/* visible ring */}
+            <mesh>
+              <ringGeometry args={[0.18, 0.26, 32]} />
+              <meshBasicMaterial
+                color={PUCK_COLOR}
+                transparent
+                opacity={isCurrent ? 0.3 : PUCK_OPACITY}
+                depthWrite={false}
+              />
+            </mesh>
+          </group>
         );
       })}
     </group>

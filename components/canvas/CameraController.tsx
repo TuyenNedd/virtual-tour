@@ -5,63 +5,23 @@ import * as THREE from "three";
 import { useViewStore } from "@/stores/viewStore";
 import { INSIDE_FOV, DOLLHOUSE_FOV } from "@/lib/constants";
 
-function desiredPose(
-  mode: string,
-  sweepPos: THREE.Vector3,
-  center: THREE.Vector3,
-  size: THREE.Vector3,
-): { pos: THREE.Vector3; target: THREE.Vector3; fov: number } {
-  const radius = Math.max(size.x, size.z);
-  if (mode === "dollhouse") {
-    return {
-      pos: new THREE.Vector3(
-        center.x + radius,
-        center.y + radius * 0.9,
-        center.z + radius,
-      ),
-      target: center.clone(),
-      fov: DOLLHOUSE_FOV,
-    };
-  }
-  if (mode === "floorplan") {
-    return {
-      pos: new THREE.Vector3(
-        center.x,
-        center.y + radius * 1.6,
-        center.z + 0.001,
-      ),
-      target: center.clone(),
-      fov: DOLLHOUSE_FOV,
-    };
-  }
-  // inside: camera sits at the sweep; target is a short distance ahead toward
-  // the room center so OrbitControls becomes a gentle in-place look-around.
-  const dir = new THREE.Vector3(
-    center.x - sweepPos.x,
-    0,
-    center.z - sweepPos.z,
-  );
-  if (dir.lengthSq() < 1e-6) dir.set(0, 0, -1);
-  dir.normalize();
-  const target = sweepPos.clone().add(dir.multiplyScalar(1.5));
-  return { pos: sweepPos.clone(), target, fov: INSIDE_FOV };
-}
+type OrbitLike = THREE.EventDispatcher & {
+  target: THREE.Vector3;
+  enabled: boolean;
+  update: () => void;
+};
 
 export function CameraController() {
-  const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
-  // OrbitControls registers itself here via makeDefault (may be null on first frames)
-  const controls = useThree((s) => s.controls) as
-    | (THREE.EventDispatcher & {
-        target: THREE.Vector3;
-        enabled: boolean;
-        update: () => void;
-      })
-    | null;
+  const camera = useThree((s) => s.camera);
+  const viewport = useThree((s) => s.size);
+  // OrbitControls registers itself here via makeDefault (null in inside mode)
+  const controls = useThree((s) => s.controls) as OrbitLike | null;
 
   const space = useViewStore((s) => s.space);
   const mode = useViewStore((s) => s.mode);
   const currentSweepId = useViewStore((s) => s.currentSweepId);
   const setTransitioning = useViewStore((s) => s.setTransitioning);
+  const setFacing = useViewStore((s) => s.setFacing);
 
   const bounds = useRef({
     center: new THREE.Vector3(),
@@ -71,6 +31,10 @@ export function CameraController() {
   const goalPos = useRef(new THREE.Vector3());
   const goalTarget = useRef(new THREE.Vector3());
   const goalFov = useRef(INSIDE_FOV);
+  const goalZoom = useRef(1);
+  const prevMode = useRef<string | null>(null);
+  const lastFacing = useRef(0);
+  const tmp = useRef(new THREE.Vector3());
 
   // recompute model bounds from sweep extents when the space changes
   useEffect(() => {
@@ -97,41 +61,102 @@ export function CameraController() {
     if (!space || space.sweeps.length === 0) return;
     const sweep =
       space.sweeps.find((s) => s.id === currentSweepId) ?? space.sweeps[0];
-    const { pos, target, fov } = desiredPose(
-      mode,
-      new THREE.Vector3(...sweep.position),
-      bounds.current.center,
-      bounds.current.size,
-    );
-    goalPos.current.copy(pos);
-    goalTarget.current.copy(target);
-    goalFov.current = fov;
+    const sp = new THREE.Vector3(...sweep.position);
+    const { center, size } = bounds.current;
+    const radius = Math.max(size.x, size.z);
+
+    if (mode === "dollhouse") {
+      goalPos.current.set(
+        center.x + radius,
+        center.y + radius * 0.9,
+        center.z + radius,
+      );
+      goalTarget.current.copy(center);
+      goalFov.current = DOLLHOUSE_FOV;
+    } else if (mode === "floorplan") {
+      goalPos.current.set(center.x, center.y + radius * 2 + 10, center.z);
+      goalTarget.current.copy(center);
+      // orthographic zoom to fit the floor footprint into the viewport
+      goalZoom.current =
+        Math.min(
+          viewport.width / (size.x || 1),
+          viewport.height / (size.z || 1),
+        ) * 0.9;
+    } else {
+      // inside: move to the sweep; rotation is owned by FirstPersonLook.
+      goalPos.current.copy(sp);
+      goalTarget.current.set(center.x, sp.y, center.z);
+      goalFov.current = INSIDE_FOV;
+      // On first entry into inside mode, face the room center once so the
+      // initial view is sensible. On subsequent sweep moves keep the heading.
+      if (prevMode.current !== "inside") {
+        camera.position.copy(sp);
+        camera.lookAt(goalTarget.current);
+      }
+    }
+    prevMode.current = mode;
     animating.current = true;
     setTransitioning(true);
-  }, [mode, currentSweepId, space, setTransitioning]);
+  }, [
+    mode,
+    currentSweepId,
+    space,
+    viewport.width,
+    viewport.height,
+    camera,
+    setTransitioning,
+  ]);
 
   useFrame((_, delta) => {
+    // publish camera heading (screen-space angle) for the minimap arrow
+    const dir = camera.getWorldDirection(tmp.current);
+    const facing = Math.atan2(dir.z, dir.x);
+    if (Math.abs(facing - lastFacing.current) > 0.03) {
+      lastFacing.current = facing;
+      setFacing(facing);
+    }
+
     if (!animating.current) return;
     const k = 1 - Math.pow(0.001, delta);
+    const ortho = (camera as THREE.OrthographicCamera).isOrthographicCamera;
 
     camera.position.lerp(goalPos.current, k);
-    if (controls) {
-      controls.enabled = false;
-      controls.target.lerp(goalTarget.current, k);
-      controls.update();
-    } else {
-      camera.lookAt(goalTarget.current);
-    }
-    if (Math.abs(camera.fov - goalFov.current) > 0.1) {
-      camera.fov = THREE.MathUtils.lerp(camera.fov, goalFov.current, k);
-      camera.updateProjectionMatrix();
+
+    if (mode !== "inside") {
+      if (controls) {
+        controls.enabled = false;
+        controls.target.lerp(goalTarget.current, k);
+        controls.update();
+      } else {
+        camera.lookAt(goalTarget.current);
+      }
     }
 
-    if (camera.position.distanceTo(goalPos.current) < 0.02) {
+    if (ortho) {
+      const oc = camera as THREE.OrthographicCamera;
+      oc.zoom = THREE.MathUtils.lerp(oc.zoom, goalZoom.current, k);
+      oc.updateProjectionMatrix();
+    } else {
+      const pc = camera as THREE.PerspectiveCamera;
+      if (Math.abs(pc.fov - goalFov.current) > 0.1) {
+        pc.fov = THREE.MathUtils.lerp(pc.fov, goalFov.current, k);
+        pc.updateProjectionMatrix();
+      }
+    }
+
+    const posSettled = camera.position.distanceTo(goalPos.current) < 0.05;
+    const zoomSettled =
+      !ortho ||
+      Math.abs((camera as THREE.OrthographicCamera).zoom - goalZoom.current) <
+        0.5;
+    if (posSettled && zoomSettled) {
       camera.position.copy(goalPos.current);
-      camera.fov = goalFov.current;
-      camera.updateProjectionMatrix();
-      if (controls) {
+      if (ortho) {
+        const oc = camera as THREE.OrthographicCamera;
+        oc.zoom = goalZoom.current;
+        oc.updateProjectionMatrix();
+      }
+      if (mode !== "inside" && controls) {
         controls.target.copy(goalTarget.current);
         controls.enabled = true;
         controls.update();
