@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SpaceData, ViewMode } from "@/lib/types";
+import type { SpaceData, Tag, ViewMode } from "@/lib/types";
 import { DEFAULT_MODE, INSIDE_FOV } from "@/lib/constants";
 import { findPath } from "@/lib/pathfinding";
 
@@ -12,6 +12,8 @@ interface ViewState {
   isTransitioning: boolean;
   facing: number; // screen-space heading (radians) for the minimap arrow
   insideFov: number; // perspective FOV for inside mode (zoom)
+  tags: Tag[];
+  selectedTagId: string | null;
   setSpace: (s: SpaceData) => void;
   setMode: (m: ViewMode) => void;
   goToSweep: (id: string) => void;
@@ -20,6 +22,8 @@ interface ViewState {
   setTransitioning: (v: boolean) => void;
   setFacing: (f: number) => void;
   setInsideFov: (f: number) => void;
+  setTags: (t: Tag[]) => void;
+  selectTag: (id: string | null) => void;
 }
 
 export const useViewStore = create<ViewState>((set, get) => ({
@@ -31,6 +35,8 @@ export const useViewStore = create<ViewState>((set, get) => ({
   isTransitioning: false,
   facing: 0,
   insideFov: INSIDE_FOV,
+  tags: [],
+  selectedTagId: null,
   setSpace: (space) =>
     set({
       space,
@@ -69,4 +75,6 @@ export const useViewStore = create<ViewState>((set, get) => ({
   setTransitioning: (isTransitioning) => set({ isTransitioning }),
   setFacing: (facing) => set({ facing }),
   setInsideFov: (insideFov) => set({ insideFov }),
+  setTags: (tags) => set({ tags }),
+  selectTag: (selectedTagId) => set({ selectedTagId }),
 }));

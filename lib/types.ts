@@ -22,3 +22,11 @@ export interface SpaceData {
   floors: Floor[];
   sweeps: Sweep[];
 }
+
+export interface Tag {
+  id: string;
+  position: Vec3; // world position (Y-up, same space as sweeps)
+  title: string;
+  body: string;
+  color?: string;
+}
