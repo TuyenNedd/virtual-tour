@@ -2,9 +2,12 @@
 import { useEffect, useRef } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useViewStore } from "@/stores/viewStore";
 
 const SENSITIVITY = 0.005;
 const PITCH_LIMIT = Math.PI / 2 - 0.05;
+const FOV_MIN = 30;
+const FOV_MAX = 90;
 
 // First-person look-in-place for Inside mode: dragging rotates the camera's own
 // orientation (yaw/pitch) without moving it, like standing and turning your head.
@@ -13,6 +16,7 @@ const PITCH_LIMIT = Math.PI / 2 - 0.05;
 export function FirstPersonLook({ enabled }: { enabled: boolean }) {
   const camera = useThree((s) => s.camera);
   const gl = useThree((s) => s.gl);
+  const setInsideFov = useViewStore((s) => s.setInsideFov);
 
   const yaw = useRef(0);
   const pitch = useRef(0);
@@ -52,15 +56,31 @@ export function FirstPersonLook({ enabled }: { enabled: boolean }) {
     const onUp = () => {
       dragging.current = false;
     };
+    // wheel / +-buttons zoom by adjusting FOV (Matterport-style zoom)
+    const onWheel = (e: WheelEvent) => {
+      if (!enabled) return;
+      e.preventDefault();
+      const cam = camera as THREE.PerspectiveCamera;
+      if (!cam.isPerspectiveCamera) return;
+      const next = Math.max(
+        FOV_MIN,
+        Math.min(FOV_MAX, cam.fov + e.deltaY * 0.03),
+      );
+      cam.fov = next;
+      cam.updateProjectionMatrix();
+      setInsideFov(next);
+    };
     el.addEventListener("pointerdown", onDown);
+    el.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
     return () => {
       el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("wheel", onWheel);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  }, [enabled, gl]);
+  }, [enabled, gl, camera, setInsideFov]);
 
   useFrame(() => {
     if (!enabled) return;
