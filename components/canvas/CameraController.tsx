@@ -145,12 +145,20 @@ export function CameraController() {
       }
     }
 
-    const posSettled = camera.position.distanceTo(goalPos.current) < 0.05;
+    const posSettled =
+      camera.position.distanceTo(goalPos.current) <
+      (useViewStore.getState().pendingPath.length > 0 ? 0.3 : 0.05);
     const zoomSettled =
       !ortho ||
       Math.abs((camera as THREE.OrthographicCamera).zoom - goalZoom.current) <
         0.5;
     if (posSettled && zoomSettled) {
+      // Walking a multi-step path: chain to the next waypoint, stay in transition.
+      const { pendingPath, advancePath } = useViewStore.getState();
+      if (mode === "inside" && pendingPath.length > 0) {
+        advancePath();
+        return;
+      }
       camera.position.copy(goalPos.current);
       if (ortho) {
         const oc = camera as THREE.OrthographicCamera;
