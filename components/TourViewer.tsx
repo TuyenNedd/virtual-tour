@@ -16,6 +16,7 @@ import { Minimap } from "./ui/Minimap";
 import { TagPanel } from "./ui/TagPanel";
 import { MeasureControls } from "./ui/MeasureControls";
 import { GuidedTour } from "./ui/GuidedTour";
+import { DeepLink } from "./DeepLink";
 
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);
@@ -87,6 +88,7 @@ export function TourViewer() {
           <MeasureControls />
           <GuidedTour />
           <TagPanel />
+          <DeepLink />
         </>
       )}
       <LoadingScreen />

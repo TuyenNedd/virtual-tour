@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 
 function toggleFullscreen() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen();
@@ -11,10 +12,30 @@ function zoom(deltaY: number) {
 }
 
 export function ViewControls() {
+  const [copied, setCopied] = useState(false);
+
+  const share = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard may be unavailable (insecure context) — ignore
+    }
+  };
+
   const btn =
     "flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70";
   return (
-    <div className="absolute bottom-4 right-4 z-40 flex gap-2">
+    <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
+      {copied && (
+        <span className="rounded bg-black/60 px-2 py-1 text-xs text-white backdrop-blur">
+          Link copied
+        </span>
+      )}
+      <button className={btn} aria-label="Copy share link" onClick={share}>
+        ⇪
+      </button>
       <button className={btn} aria-label="Zoom in" onClick={() => zoom(-120)}>
         +
       </button>
