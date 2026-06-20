@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { nearestSweep, neighborsOf, sweepsOnFloor } from "./sweepGraph";
+import { nearestSweep, neighborsOf, sweepsOnFloor } from "./sweep-graph";
 import type { Sweep } from "./types";
 
 const sweeps: Sweep[] = [

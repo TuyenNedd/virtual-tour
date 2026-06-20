@@ -1,5 +1,5 @@
 "use client";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 import type { ViewMode } from "@/lib/types";
 
 const MODES: { id: ViewMode; label: string }[] = [

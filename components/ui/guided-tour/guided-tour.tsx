@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useViewStore } from "@/stores/viewStore";
-import { nearestSweep } from "@/lib/sweepGraph";
+import { useViewStore } from "@/stores/view-store";
+import { nearestSweep } from "@/lib/sweep-graph";
 
 const AUTOPLAY_MS = 4000;
 
@@ -75,10 +75,7 @@ export function GuidedTour() {
       >
         ‹
       </button>
-      <button
-        className={btn}
-        onClick={() => setPlaying((p) => !p)}
-      >
+      <button className={btn} onClick={() => setPlaying((p) => !p)}>
         {playing ? "Pause" : "Play"}
       </button>
       <button

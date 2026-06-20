@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 
 const SENSITIVITY = 0.005;
 const PITCH_LIMIT = Math.PI / 2 - 0.05;

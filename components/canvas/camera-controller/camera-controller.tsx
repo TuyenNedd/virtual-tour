@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 import { INSIDE_FOV, DOLLHOUSE_FOV } from "@/lib/constants";
 
 type OrbitLike = THREE.EventDispatcher & {
