@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SpaceData, Tag, ViewMode, Vec3 } from "@/lib/types";
+import type { SpaceData, Tag, ViewMode, Vec3, RoomLabel } from "@/lib/types";
 import { DEFAULT_MODE, INSIDE_FOV } from "@/lib/constants";
 import { findPath } from "@/lib/pathfinding";
 
@@ -14,6 +14,7 @@ interface ViewState {
   insideFov: number; // perspective FOV for inside mode (zoom)
   tags: Tag[];
   selectedTagId: string | null;
+  rooms: RoomLabel[];
   measureMode: boolean;
   measurePoints: Vec3[];
   setSpace: (s: SpaceData) => void;
@@ -26,6 +27,7 @@ interface ViewState {
   setInsideFov: (f: number) => void;
   setTags: (t: Tag[]) => void;
   selectTag: (id: string | null) => void;
+  setRooms: (r: RoomLabel[]) => void;
   toggleMeasure: () => void;
   addMeasurePoint: (p: Vec3) => void;
   clearMeasure: () => void;
@@ -42,6 +44,7 @@ export const useViewStore = create<ViewState>((set, get) => ({
   insideFov: INSIDE_FOV,
   tags: [],
   selectedTagId: null,
+  rooms: [],
   measureMode: false,
   measurePoints: [],
   setSpace: (space) =>
@@ -84,6 +87,7 @@ export const useViewStore = create<ViewState>((set, get) => ({
   setInsideFov: (insideFov) => set({ insideFov }),
   setTags: (tags) => set({ tags }),
   selectTag: (selectedTagId) => set({ selectedTagId }),
+  setRooms: (rooms) => set({ rooms }),
   toggleMeasure: () =>
     set((s) => ({
       measureMode: !s.measureMode,
