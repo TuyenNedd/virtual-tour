@@ -5,6 +5,7 @@ import { useGLTF } from "@react-three/drei";
 import { useViewStore } from "@/stores/view-store";
 import { loadSpace, fallbackSpace } from "@/lib/space";
 import { loadTags } from "@/lib/tags";
+import { loadRooms } from "@/lib/rooms";
 import { isWebGLAvailable } from "@/lib/webgl";
 import { INSIDE_FOV, DRACO_PATH, FALLBACK_MODEL_URL } from "@/lib/constants";
 import { Scene } from "../canvas/scene/scene";
@@ -21,6 +22,7 @@ import { DeepLink } from "../deep-link/deep-link";
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);
   const setTags = useViewStore((s) => s.setTags);
+  const setRooms = useViewStore((s) => s.setRooms);
   const space = useViewStore((s) => s.space);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +42,8 @@ export function TourViewer() {
         }
       });
     loadTags().then(setTags);
-  }, [setSpace, setTags]);
+    loadRooms().then(setRooms);
+  }, [setSpace, setTags, setRooms]);
 
   if (error) {
     return (

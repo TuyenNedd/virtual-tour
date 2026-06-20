@@ -30,3 +30,9 @@ export interface Tag {
   body: string;
   color?: string;
 }
+
+export interface RoomLabel {
+  id: string;
+  position: Vec3; // world position (Y-up)
+  name: string;
+}

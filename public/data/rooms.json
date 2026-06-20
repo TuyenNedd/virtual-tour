@@ -1,0 +1,6 @@
+[
+  { "id": "r1", "position": [-22, 1.6, 0.6], "name": "Hallway" },
+  { "id": "r2", "position": [-5, 1.6, 8.5], "name": "Main Room" },
+  { "id": "r3", "position": [2, 1.6, 4], "name": "Living Area" },
+  { "id": "r4", "position": [8, 1.6, 11.5], "name": "Far Room" }
+]

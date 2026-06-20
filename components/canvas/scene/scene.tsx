@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { ThreeEvent } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -16,9 +16,11 @@ import { CameraController } from "../camera-controller/camera-controller";
 import { FirstPersonLook } from "../first-person-look/first-person-look";
 import { Tags } from "../tags/tags";
 import { Measurements } from "../measurements/measurements";
+import { RoomLabels } from "../room-labels/room-labels";
 
 // Clicks/hover on floor geometry below this height count as floor interactions.
 const FLOOR_CLICK_MAX_Y = 0.9;
+const IDLE_MS = 4000;
 
 export function Scene() {
   const space = useViewStore((s) => s.space);
@@ -30,6 +32,8 @@ export function Scene() {
   const reticle = useRef<THREE.Mesh>(null);
   // track pointer-down position so we can tell a click from a look-drag
   const downAt = useRef({ x: 0, y: 0 });
+  // idle detection for dollhouse auto-rotate
+  const [idle, setIdle] = useState(false);
 
   useEffect(() => {
     const onDown = (e: PointerEvent) => {
@@ -37,6 +41,22 @@ export function Scene() {
     };
     window.addEventListener("pointerdown", onDown);
     return () => window.removeEventListener("pointerdown", onDown);
+  }, []);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      setIdle(false);
+      clearTimeout(timer);
+      timer = setTimeout(() => setIdle(true), IDLE_MS);
+    };
+    const events = ["pointerdown", "pointermove", "wheel", "keydown"];
+    events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
   }, []);
 
   if (!space) return null;
@@ -108,6 +128,7 @@ export function Scene() {
       <SweepPucks />
       <Tags />
       <Measurements />
+      <RoomLabels />
 
       {/* Perspective camera for inside + dollhouse; orthographic for floorplan. */}
       <PerspectiveCamera
@@ -133,6 +154,8 @@ export function Scene() {
           enablePan={isFloorplan}
           enableZoom
           enableRotate={!isFloorplan}
+          autoRotate={!isFloorplan && idle && !isTransitioning}
+          autoRotateSpeed={0.6}
         />
       )}
       <CameraController />
