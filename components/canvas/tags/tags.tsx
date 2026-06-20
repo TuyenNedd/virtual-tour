@@ -1,6 +1,6 @@
 "use client";
 import { Billboard } from "@react-three/drei";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 
 // Mattertag-style hotspots: billboarded dots that always face the camera and
 // stay visible through walls (depthTest off), like Matterport. Click to open.

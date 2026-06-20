@@ -1,6 +1,6 @@
 "use client";
 import { Line, Html } from "@react-three/drei";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 import { segments, formatLength } from "@/lib/measure";
 
 export function Measurements() {

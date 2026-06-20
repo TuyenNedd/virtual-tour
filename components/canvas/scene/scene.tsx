@@ -7,15 +7,15 @@ import {
   OrthographicCamera,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { useViewStore } from "@/stores/viewStore";
-import { nearestSweep } from "@/lib/sweepGraph";
+import { useViewStore } from "@/stores/view-store";
+import { nearestSweep } from "@/lib/sweep-graph";
 import { INSIDE_FOV } from "@/lib/constants";
-import { SpaceModel } from "./SpaceModel";
-import { SweepPucks } from "./SweepPucks";
-import { CameraController } from "./CameraController";
-import { FirstPersonLook } from "./FirstPersonLook";
-import { Tags } from "./Tags";
-import { Measurements } from "./Measurements";
+import { SpaceModel } from "../space-model/space-model";
+import { SweepPucks } from "../sweep-pucks/sweep-pucks";
+import { CameraController } from "../camera-controller/camera-controller";
+import { FirstPersonLook } from "../first-person-look/first-person-look";
+import { Tags } from "../tags/tags";
+import { Measurements } from "../measurements/measurements";
 
 // Clicks/hover on floor geometry below this height count as floor interactions.
 const FLOOR_CLICK_MAX_Y = 0.9;

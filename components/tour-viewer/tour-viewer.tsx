@@ -2,21 +2,21 @@
 import { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 import { loadSpace, fallbackSpace } from "@/lib/space";
 import { loadTags } from "@/lib/tags";
 import { isWebGLAvailable } from "@/lib/webgl";
 import { INSIDE_FOV, DRACO_PATH, FALLBACK_MODEL_URL } from "@/lib/constants";
-import { Scene } from "./canvas/Scene";
-import { LoadingScreen } from "./ui/LoadingScreen";
-import { ModeToggle } from "./ui/ModeToggle";
-import { ViewControls } from "./ui/ViewControls";
-import { FloorSelector } from "./ui/FloorSelector";
-import { Minimap } from "./ui/Minimap";
-import { TagPanel } from "./ui/TagPanel";
-import { MeasureControls } from "./ui/MeasureControls";
-import { GuidedTour } from "./ui/GuidedTour";
-import { DeepLink } from "./DeepLink";
+import { Scene } from "../canvas/scene/scene";
+import { LoadingScreen } from "../ui/loading-screen/loading-screen";
+import { ModeToggle } from "../ui/mode-toggle/mode-toggle";
+import { ViewControls } from "../ui/view-controls/view-controls";
+import { FloorSelector } from "../ui/floor-selector/floor-selector";
+import { Minimap } from "../ui/minimap/minimap";
+import { TagPanel } from "../ui/tag-panel/tag-panel";
+import { MeasureControls } from "../ui/measure-controls/measure-controls";
+import { GuidedTour } from "../ui/guided-tour/guided-tour";
+import { DeepLink } from "../deep-link/deep-link";
 
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);

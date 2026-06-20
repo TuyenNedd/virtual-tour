@@ -1,5 +1,5 @@
 "use client";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 
 export function TagPanel() {
   const tags = useViewStore((s) => s.tags);

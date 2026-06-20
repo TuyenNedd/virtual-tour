@@ -1,5 +1,5 @@
 "use client";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 
 export function FloorSelector() {
   const space = useViewStore((s) => s.space);

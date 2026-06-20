@@ -1,6 +1,6 @@
 "use client";
-import { useViewStore } from "@/stores/viewStore";
-import { sweepsOnFloor } from "@/lib/sweepGraph";
+import { useViewStore } from "@/stores/view-store";
+import { sweepsOnFloor } from "@/lib/sweep-graph";
 import { PUCK_COLOR, PUCK_OPACITY, SWEEP_EYE_HEIGHT } from "@/lib/constants";
 
 export function SweepPucks() {

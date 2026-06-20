@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 import type { ViewMode } from "@/lib/types";
 
 function parseHash() {

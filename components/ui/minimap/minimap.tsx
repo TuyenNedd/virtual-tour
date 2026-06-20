@@ -1,7 +1,7 @@
 "use client";
 import { useMemo } from "react";
-import { useViewStore } from "@/stores/viewStore";
-import { sweepsOnFloor } from "@/lib/sweepGraph";
+import { useViewStore } from "@/stores/view-store";
+import { sweepsOnFloor } from "@/lib/sweep-graph";
 
 const SIZE = 128;
 const PAD = 10;

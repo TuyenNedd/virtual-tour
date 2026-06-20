@@ -1,7 +1,8 @@
 import dynamic from "next/dynamic";
 
 const TourViewer = dynamic(
-  () => import("@/components/TourViewer").then((m) => m.TourViewer),
+  () =>
+    import("@/components/tour-viewer/tour-viewer").then((m) => m.TourViewer),
   { ssr: false },
 );
 

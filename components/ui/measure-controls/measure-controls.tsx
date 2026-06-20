@@ -1,5 +1,5 @@
 "use client";
-import { useViewStore } from "@/stores/viewStore";
+import { useViewStore } from "@/stores/view-store";
 
 export function MeasureControls() {
   const mode = useViewStore((s) => s.mode);
