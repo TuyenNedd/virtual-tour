@@ -57,14 +57,15 @@ export function GuidedTour() {
           setActive(true);
           goTo(0);
         }}
-        className="absolute bottom-4 left-4 z-40 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-black/70"
+        className="absolute bottom-4 left-4 z-40 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
       >
         Guided tour
       </button>
     );
   }
 
-  const btn = "px-2 py-0.5 disabled:opacity-40 hover:text-white";
+  const btn =
+    "px-2 py-0.5 disabled:opacity-40 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded";
   return (
     <div className="absolute bottom-4 left-4 z-40 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1.5 text-white backdrop-blur">
       <button
@@ -75,7 +76,11 @@ export function GuidedTour() {
       >
         ‹
       </button>
-      <button className={btn} onClick={() => setPlaying((p) => !p)}>
+      <button
+        className={btn}
+        aria-label={playing ? "Pause tour" : "Play tour"}
+        onClick={() => setPlaying((p) => !p)}
+      >
         {playing ? "Pause" : "Play"}
       </button>
       <button

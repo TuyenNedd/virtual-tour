@@ -50,7 +50,7 @@ export function TourViewer() {
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 bg-neutral-900 text-white">
         <p>Could not load the tour.</p>
         <button
-          className="rounded bg-white px-4 py-2 text-neutral-900"
+          className="rounded bg-white px-4 py-2 text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           onClick={() => location.reload()}
         >
           Retry
@@ -68,7 +68,17 @@ export function TourViewer() {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-neutral-900">
+    <div
+      className="relative h-screen w-screen overflow-hidden bg-neutral-900"
+      role="application"
+      aria-label="3D virtual tour viewer"
+    >
+      <p className="sr-only">
+        Use the mode buttons to switch between Inside, Dollhouse and Floorplan
+        views. In Inside view, drag to look around, scroll or pinch to zoom, use
+        the arrow keys to move forward and back and to turn, and click a floor
+        marker to walk there.
+      </p>
       <Canvas
         camera={{
           fov: INSIDE_FOV,
