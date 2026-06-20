@@ -15,6 +15,7 @@ import { FloorSelector } from "./ui/FloorSelector";
 import { Minimap } from "./ui/Minimap";
 import { TagPanel } from "./ui/TagPanel";
 import { MeasureControls } from "./ui/MeasureControls";
+import { GuidedTour } from "./ui/GuidedTour";
 
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);
@@ -84,6 +85,7 @@ export function TourViewer() {
           <ModeToggle />
           <ViewControls />
           <MeasureControls />
+          <GuidedTour />
           <TagPanel />
         </>
       )}
