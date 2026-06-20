@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import type { ThreeEvent } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -25,6 +25,16 @@ export function Scene() {
   const isTransitioning = useViewStore((s) => s.isTransitioning);
   const goToSweep = useViewStore((s) => s.goToSweep);
   const reticle = useRef<THREE.Mesh>(null);
+  // track pointer-down position so we can tell a click from a look-drag
+  const downAt = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const onDown = (e: PointerEvent) => {
+      downAt.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, []);
 
   if (!space) return null;
 
@@ -40,7 +50,11 @@ export function Scene() {
   };
 
   const onModelClick = (e: ThreeEvent<MouseEvent>) => {
-    if (!isInside || e.point.y >= FLOOR_CLICK_MAX_Y) return;
+    if (!isInside || isTransitioning || e.point.y >= FLOOR_CLICK_MAX_Y) return;
+    // ignore if the pointer was dragged (a look-around, not a click)
+    const dx = e.nativeEvent.clientX - downAt.current.x;
+    const dy = e.nativeEvent.clientY - downAt.current.y;
+    if (Math.hypot(dx, dy) > 6) return;
     e.stopPropagation();
     const ns = nearestSweep(space.sweeps, [e.point.x, e.point.y, e.point.z]);
     if (ns) goToSweep(ns.id);
