@@ -15,7 +15,8 @@ export function MeasureControls() {
     <div className="absolute left-1/2 top-4 z-40 flex -translate-x-1/2 items-center gap-2">
       <button
         onClick={toggleMeasure}
-        className={`rounded-full px-3 py-1.5 text-sm backdrop-blur transition ${
+        aria-pressed={measureMode}
+        className={`rounded-full px-3 py-1.5 text-sm backdrop-blur transition focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
           measureMode
             ? "bg-white text-neutral-900"
             : "bg-black/50 text-white hover:bg-black/70"
@@ -32,7 +33,7 @@ export function MeasureControls() {
           </span>
           <button
             onClick={clearMeasure}
-            className="rounded bg-white/20 px-2 py-0.5 hover:bg-white/30"
+            className="rounded bg-white/20 px-2 py-0.5 hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             Clear
           </button>

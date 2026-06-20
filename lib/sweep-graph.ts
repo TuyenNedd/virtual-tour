@@ -31,3 +31,35 @@ export function neighborsOf(sweeps: Sweep[], id: string): Sweep[] {
 export function sweepsOnFloor(sweeps: Sweep[], floor: number): Sweep[] {
   return sweeps.filter((s) => s.floor === floor);
 }
+
+// Pick the graph neighbor best aligned with a horizontal direction (dirX, dirZ),
+// e.g. the camera forward. Returns undefined if none is aligned beyond `minDot`.
+export function bestNeighborInDirection(
+  sweeps: Sweep[],
+  fromId: string,
+  dirX: number,
+  dirZ: number,
+  minDot = 0.3,
+): Sweep | undefined {
+  const from = sweeps.find((s) => s.id === fromId);
+  if (!from) return undefined;
+  const dl = Math.hypot(dirX, dirZ);
+  if (dl === 0) return undefined;
+  const ndx = dirX / dl;
+  const ndz = dirZ / dl;
+
+  let best: Sweep | undefined;
+  let bestDot = minDot;
+  for (const n of neighborsOf(sweeps, fromId)) {
+    const vx = n.position[0] - from.position[0];
+    const vz = n.position[2] - from.position[2];
+    const vl = Math.hypot(vx, vz);
+    if (vl === 0) continue;
+    const dot = (vx / vl) * ndx + (vz / vl) * ndz;
+    if (dot > bestDot) {
+      bestDot = dot;
+      best = n;
+    }
+  }
+  return best;
+}

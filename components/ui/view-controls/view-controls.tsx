@@ -25,7 +25,7 @@ export function ViewControls() {
   };
 
   const btn =
-    "flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70";
+    "flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
   return (
     <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
       {copied && (
