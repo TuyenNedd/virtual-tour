@@ -9,8 +9,9 @@ export function Tags() {
   const mode = useViewStore((s) => s.mode);
   const selectedTagId = useViewStore((s) => s.selectedTagId);
   const selectTag = useViewStore((s) => s.selectTag);
+  const measureMode = useViewStore((s) => s.measureMode);
 
-  if (mode === "floorplan" || tags.length === 0) return null;
+  if (mode === "floorplan" || measureMode || tags.length === 0) return null;
 
   return (
     <>

@@ -9,8 +9,9 @@ export function SweepPucks() {
   const floorId = useViewStore((s) => s.floorId);
   const currentSweepId = useViewStore((s) => s.currentSweepId);
   const goToSweep = useViewStore((s) => s.goToSweep);
+  const measureMode = useViewStore((s) => s.measureMode);
 
-  if (!space || mode !== "inside") return null;
+  if (!space || mode !== "inside" || measureMode) return null;
   // Show every walkable point on the floor (like Matterport). Walls naturally
   // occlude pucks behind them via depth testing, so you only see reachable ones
   // and can always spot the way out of a room. Skip the one under the camera.

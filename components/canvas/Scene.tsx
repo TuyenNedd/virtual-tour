@@ -15,6 +15,7 @@ import { SweepPucks } from "./SweepPucks";
 import { CameraController } from "./CameraController";
 import { FirstPersonLook } from "./FirstPersonLook";
 import { Tags } from "./Tags";
+import { Measurements } from "./Measurements";
 
 // Clicks/hover on floor geometry below this height count as floor interactions.
 const FLOOR_CLICK_MAX_Y = 0.9;
@@ -24,6 +25,8 @@ export function Scene() {
   const mode = useViewStore((s) => s.mode);
   const isTransitioning = useViewStore((s) => s.isTransitioning);
   const goToSweep = useViewStore((s) => s.goToSweep);
+  const measureMode = useViewStore((s) => s.measureMode);
+  const addMeasurePoint = useViewStore((s) => s.addMeasurePoint);
   const reticle = useRef<THREE.Mesh>(null);
   // track pointer-down position so we can tell a click from a look-drag
   const downAt = useRef({ x: 0, y: 0 });
@@ -43,18 +46,27 @@ export function Scene() {
 
   const onModelMove = (e: ThreeEvent<PointerEvent>) => {
     if (!reticle.current) return;
-    const onFloor = isInside && e.point.y < FLOOR_CLICK_MAX_Y;
+    const onFloor = isInside && !measureMode && e.point.y < FLOOR_CLICK_MAX_Y;
     reticle.current.visible = onFloor;
     if (onFloor)
       reticle.current.position.set(e.point.x, e.point.y + 0.02, e.point.z);
   };
 
   const onModelClick = (e: ThreeEvent<MouseEvent>) => {
-    if (!isInside || isTransitioning || e.point.y >= FLOOR_CLICK_MAX_Y) return;
     // ignore if the pointer was dragged (a look-around, not a click)
     const dx = e.nativeEvent.clientX - downAt.current.x;
     const dy = e.nativeEvent.clientY - downAt.current.y;
     if (Math.hypot(dx, dy) > 6) return;
+
+    // measure mode: drop a measurement point on any clicked surface
+    if (measureMode) {
+      e.stopPropagation();
+      addMeasurePoint([e.point.x, e.point.y, e.point.z]);
+      return;
+    }
+
+    // otherwise click the floor to walk to the nearest sweep
+    if (!isInside || isTransitioning || e.point.y >= FLOOR_CLICK_MAX_Y) return;
     e.stopPropagation();
     const ns = nearestSweep(space.sweeps, [e.point.x, e.point.y, e.point.z]);
     if (ns) goToSweep(ns.id);
@@ -95,6 +107,7 @@ export function Scene() {
 
       <SweepPucks />
       <Tags />
+      <Measurements />
 
       {/* Perspective camera for inside + dollhouse; orthographic for floorplan. */}
       <PerspectiveCamera
