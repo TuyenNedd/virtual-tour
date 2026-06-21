@@ -1,44 +1,38 @@
-export interface Sweep {
-  id: string;
-  position: [number, number, number];
-  rotation: [number, number, number];
-  neighbors: string[];
-  panoramaUrl: string;
-  floor: number;
-}
+export type ViewMode = "inside" | "dollhouse" | "floorplan";
+
+export type Vec3 = [number, number, number];
 
 export interface Floor {
-  id: string;
+  id: number;
   name: string;
-  number: number;
-  sweeps: string[];
+  yMin: number;
+  yMax: number;
+}
+
+export interface Sweep {
+  id: string;
+  position: Vec3;
+  floor: number;
+  neighbors: string[];
 }
 
 export interface SpaceData {
-  id: string;
-  name: string;
+  modelUrl: string;
+  up: "y" | "z";
   floors: Floor[];
   sweeps: Sweep[];
-  modelUrl: string | null;
 }
 
-export enum ViewMode {
-  Panorama = 1,
-  Dollhouse = 2,
-  Floorplan = 3,
-  Transition = -1,
+export interface Tag {
+  id: string;
+  position: Vec3; // world position (Y-up, same space as sweeps)
+  title: string;
+  body: string;
+  color?: string;
 }
 
-export interface TransitionState {
-  active: boolean;
-  progress: number;
-  from: ViewMode;
-  to: ViewMode;
-}
-
-export interface CameraState {
-  position: [number, number, number];
-  target: [number, number, number];
-  fov: number;
-  zoom: number;
+export interface RoomLabel {
+  id: string;
+  position: Vec3; // world position (Y-up)
+  name: string;
 }

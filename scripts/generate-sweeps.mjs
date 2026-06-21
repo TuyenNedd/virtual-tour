@@ -1,0 +1,132 @@
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import * as THREE from "three";
+import { loadGltf } from "node-three-gltf";
+
+const MODEL_FILE = "public/hm3d-example-glb/00770-NBg5UqG3di3/NBg5UqG3di3.glb";
+const MODEL_URL = "/model/space.glb";
+const OUT = "public/data/space.json";
+
+const SPACING = 1.2;
+const EYE = 1.5;
+const HEADROOM = 1.4;
+const NEIGHBOR_R = 2.2;
+
+const gltf = await loadGltf(resolve(MODEL_FILE));
+const scene = gltf.scene;
+// HM3D meshes are Z-up; rotate to Y-up so the whole (Y-up) pipeline is consistent.
+// The renderer (SpaceModel) applies the SAME rotation, so sweep coords match the model.
+scene.rotation.x = -Math.PI / 2;
+const meshes = [];
+scene.updateMatrixWorld(true);
+scene.traverse((o) => o.isMesh && meshes.push(o));
+
+const box = new THREE.Box3().setFromObject(scene);
+const ray = new THREE.Raycaster();
+const down = new THREE.Vector3(0, -1, 0);
+
+// All downward intersections at (x,z), sorted nearest->farthest from above.
+function columnHits(x, z) {
+  ray.set(new THREE.Vector3(x, box.max.y + 1, z), down);
+  ray.far = Infinity;
+  return ray.intersectObjects(meshes, true);
+}
+
+const sweeps = [];
+let i = 0;
+for (let x = box.min.x; x <= box.max.x; x += SPACING) {
+  for (let z = box.min.z; z <= box.max.z; z += SPACING) {
+    const hits = columnHits(x, z);
+    if (hits.length === 0) continue;
+    // Floor = lowest surface in this column (robust against open tops / no ceiling).
+    const fy = hits[hits.length - 1].point.y;
+    // Headroom = gap to the next surface above the floor (Infinity if open above).
+    const above = hits
+      .map((h) => h.point.y)
+      .filter((y) => y > fy + 0.1)
+      .sort((a, b) => a - b);
+    const clearance = above.length ? above[0] - fy : Infinity;
+    if (clearance < HEADROOM) continue;
+    sweeps.push({
+      id: `s${i++}`,
+      position: [round(x), round(fy + EYE), round(z)],
+      floor: 0,
+      neighbors: [],
+    });
+  }
+}
+
+const LOS_EPSILON = 0.15;
+const losRay = new THREE.Raycaster();
+
+// Keep only sweeps on the dominant (main) floor level. Some columns' lowest
+// surface is a raised object (table/ledge); bucket floor heights and keep the
+// band with the most sweeps so we don't scatter pucks onto furniture.
+const FLOOR_BAND = 0.6; // metres around the main floor level
+function mainFloorFilter(list) {
+  if (list.length === 0) return list;
+  const buckets = new Map();
+  for (const s of list) {
+    const fy = s.position[1] - EYE;
+    const key = Math.round(fy / 0.5) * 0.5;
+    buckets.set(key, (buckets.get(key) ?? 0) + 1);
+  }
+  let mainKey = 0;
+  let best = -1;
+  for (const [key, count] of buckets) {
+    if (count > best) {
+      best = count;
+      mainKey = key;
+    }
+  }
+  return list.filter(
+    (s) => Math.abs(s.position[1] - EYE - mainKey) <= FLOOR_BAND,
+  );
+}
+
+const kept = mainFloorFilter(sweeps);
+sweeps.length = 0;
+sweeps.push(...kept);
+
+function hasLineOfSight(a, b) {
+  const origin = new THREE.Vector3(a.position[0], a.position[1], a.position[2]);
+  const target = new THREE.Vector3(b.position[0], b.position[1], b.position[2]);
+  const dir = new THREE.Vector3().subVectors(target, origin);
+  const dist = dir.length();
+  if (dist === 0) return true;
+  dir.normalize();
+  losRay.set(origin, dir);
+  losRay.far = dist;
+  const hits = losRay.intersectObjects(meshes, true);
+  // Occluded if geometry is hit before reaching B (minus epsilon tolerance).
+  if (hits.length && hits[0].distance < dist - LOS_EPSILON) return false;
+  return true;
+}
+
+for (const a of sweeps) {
+  for (const b of sweeps) {
+    if (a === b) continue;
+    const dx = a.position[0] - b.position[0];
+    const dz = a.position[2] - b.position[2];
+    if (Math.hypot(dx, dz) > NEIGHBOR_R) continue;
+    if (!hasLineOfSight(a, b)) continue;
+    a.neighbors.push(b.id);
+  }
+}
+
+const space = {
+  modelUrl: MODEL_URL,
+  up: "y",
+  floors: [
+    { id: 0, name: "Floor 1", yMin: round(box.min.y), yMax: round(box.max.y) },
+  ],
+  sweeps,
+};
+
+mkdirSync(dirname(OUT), { recursive: true });
+writeFileSync(OUT, JSON.stringify(space, null, 2));
+console.log(`Wrote ${sweeps.length} sweeps to ${OUT}`);
+
+function round(n) {
+  return Math.round(n * 1000) / 1000;
+}
