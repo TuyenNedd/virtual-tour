@@ -6,7 +6,7 @@ import { nearestSweep } from "@/lib/sweep-graph";
 const AUTOPLAY_MS = 4000;
 
 // Guided tour / highlight reel: steps through the tagged highlights (each tag's
-// nearest sweep) with prev/next and autoplay, walking the camera to each stop.
+// nearest sweep) with prev/next and autoplay. Rendered inline in the Toolbar.
 export function GuidedTour() {
   const space = useViewStore((s) => s.space);
   const tags = useViewStore((s) => s.tags);
@@ -49,6 +49,9 @@ export function GuidedTour() {
 
   if (stops.length === 0) return null;
 
+  const iconBtn =
+    "flex h-8 w-8 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
+
   if (!active) {
     return (
       <button
@@ -57,45 +60,43 @@ export function GuidedTour() {
           setActive(true);
           goTo(0);
         }}
-        className="absolute bottom-4 left-4 z-40 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+        className="rounded-full px-3 py-1.5 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
       >
-        Guided tour
+        Tour
       </button>
     );
   }
 
-  const btn =
-    "px-2 py-0.5 disabled:opacity-40 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded";
   return (
-    <div className="absolute bottom-4 left-4 z-40 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1.5 text-white backdrop-blur">
+    <div className="flex items-center gap-0.5">
       <button
-        className={btn}
-        aria-label="Previous"
+        className={iconBtn}
+        aria-label="Previous stop"
         disabled={index === 0}
         onClick={() => index > 0 && goTo(index - 1)}
       >
         ‹
       </button>
       <button
-        className={btn}
+        className={iconBtn}
         aria-label={playing ? "Pause tour" : "Play tour"}
         onClick={() => setPlaying((p) => !p)}
       >
-        {playing ? "Pause" : "Play"}
+        {playing ? "❚❚" : "▶"}
       </button>
       <button
-        className={btn}
-        aria-label="Next"
+        className={iconBtn}
+        aria-label="Next stop"
         disabled={index === stops.length - 1}
         onClick={() => index < stops.length - 1 && goTo(index + 1)}
       >
         ›
       </button>
-      <span className="px-1 text-xs text-white/90">
+      <span className="max-w-[7rem] truncate px-1 text-xs text-white/90">
         {index + 1}/{stops.length} · {stops[index]?.title}
       </span>
       <button
-        className="px-2 text-lg leading-none text-white/60 hover:text-white"
+        className={iconBtn}
         aria-label="Close tour"
         onClick={() => {
           setActive(false);
