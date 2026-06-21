@@ -10,18 +10,20 @@ export function LoadingScreen() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-900 text-white"
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-neutral-950 text-white"
         >
-          <div className="text-sm tracking-widest uppercase opacity-70">
+          <div className="text-xs font-medium uppercase tracking-[0.2em] text-white/60">
             Loading tour
           </div>
-          <div className="mt-4 h-1 w-48 overflow-hidden rounded bg-white/20">
+          <div className="mt-4 h-1 w-52 overflow-hidden rounded-full bg-white/15">
             <div
-              className="h-full bg-white"
+              className="h-full rounded-full bg-cyan-400 transition-[width] duration-200"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="mt-2 text-xs opacity-50">{Math.round(progress)}%</div>
+          <div className="mt-2 text-xs tabular-nums text-white/50">
+            {Math.round(progress)}%
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
