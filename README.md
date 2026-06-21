@@ -1,141 +1,131 @@
-# Virtual Tour Viewer
+# Virtual Tour
 
-A Matterport-style 3D virtual tour viewer built with Next.js and React Three Fiber. Navigate immersive 360-degree panoramas, explore a dollhouse wireframe overview, or view a top-down floorplan -- all with smooth animated transitions between modes.
+A Matterport-style virtual tour viewer built entirely with free / open-source
+tech. It renders a textured 3D mesh (from the Habitat-Matterport 3D research
+dataset) with three navigation modes plus the navigation, annotation and
+sharing features you expect from a 3D space tour.
+
+No paid APIs or hosted services.
 
 ## Features
 
-- **Panorama Mode**: Full 360-degree panorama viewing with real equirectangular image textures. Click-and-drag to look around. Directional sweep pucks appear at the bottom of the view indicating navigable neighbors.
-- **Sweep Navigation**: Click sweep pucks to navigate between viewpoints. Transitions use a smooth fade-to-black effect with a loading spinner during texture loads.
-- **Dollhouse Mode**: An elevated 3D wireframe visualization of all rooms and sweep positions with orbit controls. Click any sweep puck to jump to that location.
-- **Floorplan Mode**: A top-down orthographic-style view showing room outlines and sweep connections as a map. Click sweeps to navigate.
-- **Smooth Mode Transitions**: Two-phase camera animations with easing when switching between Panorama, Dollhouse, and Floorplan. The camera flies out/in with a subtle fade overlay to mask view switches.
-- **Animated Mode Selector**: A pill-slider UI with framer-motion layout animations, icons for each mode, and disabled state during transitions.
-- **Minimap with Orientation**: A real-time minimap in the corner shows sweep positions, connections, and a directional arrow indicating camera facing direction in panorama mode.
-- **Multi-floor Support**: Floor selector appears when a space has multiple levels, with animated indicators.
-- **Responsive Loading**: A full-screen loading overlay on initial data fetch, plus a centered spinner during sweep navigation.
+- **Inside walkthrough** — first-person look-in-place; click floor pucks (or the
+  floor itself) to walk. Movement follows a path through connected capture
+  points, so the camera never cuts through walls.
+- **Dollhouse** — orbit the whole model from outside; auto-rotates when idle.
+- **Floorplan** — true top-down orthographic view.
+- **Smooth mode transitions** and camera fly-to between points.
+- **Minimap** with the current position and a heading arrow.
+- **Mattertags** — info hotspots floating in the space (title + description).
+- **Measurement** — click points on surfaces to measure distances.
+- **Guided tour** — step through highlighted stops with prev/next and autoplay.
+- **Deep links** — the URL reflects the current mode + point so a copied link
+  reopens the same view; a Share button copies it.
+- **Floor selector** — appears automatically for multi-floor spaces.
+- Works with **mouse, touch, and keyboard**, with basic accessibility support.
 
-## Tech Stack
+## Tech
 
-- **Next.js 14** - React framework with App Router
-- **React Three Fiber** - React renderer for Three.js
-- **@react-three/drei** - Helpers for R3F (OrbitControls, etc.)
-- **Three.js** - 3D rendering engine
-- **Zustand** - Lightweight state management
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library for UI transitions
-- **TypeScript** - Static type checking
+- Next.js 14 (App Router) + React
+- React Three Fiber + drei + three.js (WebGL)
+- zustand (state), framer-motion (UI), Tailwind CSS
+- Vitest (unit tests)
+- @gltf-transform/cli (offline asset compression)
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+- Node.js 18+ and npm
+- The source GLB at `public/hm3d-example-glb/00770-NBg5UqG3di3/NBg5UqG3di3.glb`
+  (supplied locally; large source assets are gitignored)
 
-- Node.js 18+
-- npm or yarn
-
-### Installation
+## Setup & run
 
 ```bash
 npm install
-```
 
-### Development
+# 1. Compress the source GLB into public/model/space.glb (Draco + WebP)
+npm run optimize
 
-```bash
+# 2. Generate navigation sweep points into public/data/space.json
+npm run sweeps
+
+# 3. Start the dev server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Then open http://localhost:3000.
 
-### Build
+## Scripts
 
-```bash
-npm run build
-```
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm test` — run unit tests (pure logic)
+- `npm run optimize` — compress the source GLB into `public/model/space.glb`
+- `npm run sweeps` — (re)generate `public/data/space.json`
 
-## Project Structure
+## Controls
 
-```
-virtual-tour/
-  app/                    # Next.js App Router
-    layout.tsx            # Root layout with metadata
-    page.tsx              # Main page - data loading, overlays, dynamic Scene import
-    globals.css           # Tailwind directives and global styles
-  components/
-    canvas/               # React Three Fiber 3D components
-      Scene.tsx           # R3F Canvas with Suspense boundary
-      PanoramaView.tsx    # 360 equirectangular sphere + sweep pucks + yaw tracker
-      DollhouseView.tsx   # Multi-room wireframe with orbit controls
-      FloorplanView.tsx   # Top-down orthographic room layout
-      SweepPuck.tsx       # Clickable 3D navigation waypoints
-      CameraController.tsx # Animated camera transitions between modes
-    ui/                   # HTML overlay UI components
-      ModeButtons.tsx     # Animated mode switcher with pill slider and icons
-      FloorSelector.tsx   # Floor level selector with animated indicator
-      LoadingScreen.tsx   # Initial loading overlay
-      Minimap.tsx         # Position minimap with orientation arrow
-  stores/                 # Zustand state stores
-    viewModeStore.ts      # View mode, transitions, and camera yaw
-    sweepStore.ts         # Sweep navigation state and fade transitions
-    spaceStore.ts         # Space data and floor state
-  hooks/                  # Custom React hooks
-    useViewMode.ts        # View mode switching logic
-    useSweepNavigation.ts # Sweep navigation helpers
-    useCameraTransition.ts # Camera transition target calculation
-  lib/                    # Shared utilities
-    types.ts              # TypeScript interfaces and enums
-    constants.ts          # Configuration constants (FOV, colors, durations)
-    transitions.ts        # Easing and interpolation functions
-  public/
-    data/space.json       # Space metadata (sweeps, floors, connections)
-    panoramas/            # Equirectangular panorama images
-    model/                # 3D model files (GLB)
-```
+**Inside view**
 
-## Architecture
+- **Mouse:** drag to look around, scroll to zoom, click a floor puck or the
+  floor to walk there.
+- **Touch:** one finger to look, two-finger pinch to zoom, tap a puck/floor to
+  walk.
+- **Keyboard:** Up / Down arrows walk to the point ahead / behind you, Left /
+  Right arrows turn.
 
-### State Management
+**Dollhouse / Floorplan**
 
-Three Zustand stores manage application state:
-- **viewModeStore**: Current view mode, transition state (active, phase, progress), and camera yaw for the minimap orientation arrow.
-- **sweepStore**: Current sweep ID, all sweeps indexed by ID, navigation state (isNavigating, navigationTarget), and neighbor lookup.
-- **spaceStore**: Full space data, floor list, current floor, and initial data loading.
+- Drag to orbit (dollhouse), scroll to zoom; in floorplan, drag to pan.
 
-### Rendering Pipeline
+**Buttons:** mode toggle (bottom-center), zoom / fullscreen / share
+(bottom-right), Measure (top-center), Guided tour (bottom-left).
 
-1. `Scene.tsx` renders the R3F Canvas with a Suspense boundary
-2. View components (PanoramaView, DollhouseView, FloorplanView) conditionally render based on `currentMode`
-3. `CameraController` uses `useFrame` to interpolate camera position, target, and FOV during mode transitions
-4. During transitions, both source and destination views exist briefly; a fade overlay in `page.tsx` masks the switch at the midpoint
-5. UI overlays (mode buttons, minimap, floor selector) sit above the canvas as fixed HTML elements
+## Data files
 
-### Transition System
+These live in `public/data/` and can be hand-edited. Positions are in the
+viewer's Y-up world (same space as the generated sweeps).
 
-Mode transitions are two-phase:
-- **Phase 0**: Camera begins animating from source position. At the midpoint (t=0.5), the fade overlay peaks and `advanceTransitionPhase()` switches `currentMode` to the destination.
-- **Phase 1**: Camera continues animating to the destination position. The overlay fades out.
+- **`space.json`** (generated) — `modelUrl`, `floors`, and the `sweeps` graph
+  (each with `position` and `neighbors`).
+- **`tags.json`** — Mattertag hotspots: `{ id, position, title, body, color? }`.
+- **`rooms.json`** — room labels shown in dollhouse/floorplan:
+  `{ id, position, name }`.
 
-Sweep navigation uses a simpler fade-to-black approach: `isNavigating` triggers full opacity, a timer fires after 400ms to call `completeNavigation()` (which updates `currentSweepId`), and the overlay fades back out revealing the new panorama.
+The guided tour visits each tag's nearest sweep, so editing `tags.json` also
+updates the tour stops.
 
-### Camera Yaw Tracking
+## How it works
 
-A `CameraYawTracker` component inside PanoramaView uses `useFrame` to read `camera.rotation.y` and writes it to `viewModeStore.cameraYaw` (throttled to updates > 0.05 rad). The Minimap reads this value to draw an orientation arrow.
+- `scripts/optimize-glb.mjs` compresses the ~64MB scan mesh to ~24MB (Draco
+  geometry + WebP textures).
+- `scripts/generate-sweeps.mjs` loads the mesh, rotates it from the source
+  Z-up orientation to Y-up, samples walkable points on the floor (raycast for
+  floor + headroom), connects neighbors with a line-of-sight check, and writes
+  `public/data/space.json`.
+- The viewer loads the compressed GLB (Draco decoder served locally from
+  `public/draco/`, no CDN), places the camera at sweep points, and animates
+  between modes and points.
 
-## Adding Real Data
+## Project structure
 
-### Panorama Images
+- `lib/` — pure logic (sweep graph, pathfinding, measurement, space/tags/rooms
+  loading, WebGL check), unit-tested with Vitest.
+- `stores/view-store.ts` — single zustand store for view state.
+- `components/canvas/<name>/` — R3F scene pieces (model, pucks, camera, tags,
+  measurements, room labels, first-person look).
+- `components/ui/<name>/` — HTML overlay controls.
+- `components/tour-viewer/` — composes the canvas + overlay.
+- `scripts/` — offline asset/sweep generation.
 
-Place equirectangular JPEG images (recommended 4096x2048 or 8192x4096) in `public/panoramas/` and update the `panoramaUrl` fields in `space.json`.
+## Testing
 
-### 3D Model
+Pure logic in `lib/` is unit-tested (`npm test`). The 3D/React rendering is
+verified by `npm run build` and manual testing in the browser (WebGL rendering
+is not automated here).
 
-Export your space model as a GLB file from Blender or similar tool, place it in `public/model/`, and set the `modelUrl` field in `space.json`.
+## Notes
 
-### Space Configuration
-
-Edit `public/data/space.json` to define sweep points, floor layout, neighbor connections, and panorama URLs.
-
-## Customization
-
-- Edit `lib/constants.ts` to adjust camera distances, transition durations, FOV values, and puck appearance
-- Modify easing functions in `lib/transitions.ts` for different animation curves
-- Adjust UI styling via Tailwind classes in the `components/ui/` files
+- `tags.json` and `rooms.json` ship with placeholder demo content — edit them
+  for a real space.
+- VR is intentionally out of scope.

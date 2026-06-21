@@ -1,15 +1,20 @@
-export const DEFAULT_FOV = 75;
-export const DEFAULT_ZOOM = 1;
-export const TRANSITION_DURATION = 1.2;
-export const MIN_POLAR_ANGLE = 0.1;
-export const MAX_POLAR_ANGLE = Math.PI - 0.1;
-export const DOLLHOUSE_CAMERA_DISTANCE = 20;
-export const FLOORPLAN_CAMERA_HEIGHT = 50;
-export const SWEEP_PUCK_RADIUS = 0.3;
-export const SWEEP_PUCK_COLOR = '#4fc3f7';
+import type { ViewMode } from "./types";
 
-export const ROOM_LABELS = [
-  { name: 'Living Room', position: [1.5, 0, -1] as [number, number, number] },
-  { name: 'Kitchen', position: [-2, 0, 2] as [number, number, number] },
-  { name: 'Hallway', position: [0, 0, 0.5] as [number, number, number] },
-];
+export const INSIDE_FOV = 75;
+export const DOLLHOUSE_FOV = 50;
+
+// camera height above the floor at a sweep (also used to seat pucks on the floor)
+export const SWEEP_EYE_HEIGHT = 1.5;
+
+// puck visuals
+export const PUCK_COLOR = "#ffffff";
+export const PUCK_OPACITY = 0.85;
+
+export const DEFAULT_MODE: ViewMode = "inside";
+
+export const DRACO_PATH = "/draco/";
+export const FALLBACK_MODEL_URL = "/model/space.glb";
+
+// HM3D source meshes are Z-up; rotate -90 deg about X to present them Y-up.
+// The sweep generator (scripts/generate-sweeps.mjs) bakes the same rotation.
+export const MODEL_UP_FIX_ROTATION_X = -Math.PI / 2;
