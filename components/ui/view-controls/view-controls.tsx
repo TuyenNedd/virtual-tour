@@ -11,6 +11,10 @@ function zoom(deltaY: number) {
   canvas?.dispatchEvent(new WheelEvent("wheel", { deltaY, bubbles: true }));
 }
 
+const ICON_BTN =
+  "flex h-9 w-9 items-center justify-center rounded-full text-lg text-white/80 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
+
+// Zoom / fullscreen / share. Rendered inline inside the Toolbar.
 export function ViewControls() {
   const [copied, setCopied] = useState(false);
 
@@ -24,16 +28,34 @@ export function ViewControls() {
     }
   };
 
-  const btn =
-    "flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
   return (
-    <div className="absolute bottom-4 right-4 z-40 flex items-center gap-2">
-      {copied && (
-        <span className="rounded bg-black/60 px-2 py-1 text-xs text-white backdrop-blur">
-          Link copied
-        </span>
-      )}
-      <button className={btn} aria-label="Copy share link" onClick={share}>
+    <div className="flex items-center gap-0.5">
+      <button
+        className={ICON_BTN}
+        aria-label="Zoom out"
+        onClick={() => zoom(120)}
+      >
+        −
+      </button>
+      <button
+        className={ICON_BTN}
+        aria-label="Zoom in"
+        onClick={() => zoom(-120)}
+      >
+        +
+      </button>
+      <button
+        className={ICON_BTN}
+        aria-label="Toggle fullscreen"
+        onClick={toggleFullscreen}
+      >
+        ⛶
+      </button>
+      <button
+        className={`${ICON_BTN} relative`}
+        aria-label="Copy share link"
+        onClick={share}
+      >
         <svg
           width="16"
           height="16"
@@ -48,19 +70,11 @@ export function ViewControls() {
           <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
         </svg>
-      </button>
-      <button className={btn} aria-label="Zoom in" onClick={() => zoom(-120)}>
-        +
-      </button>
-      <button className={btn} aria-label="Zoom out" onClick={() => zoom(120)}>
-        −
-      </button>
-      <button
-        className={btn}
-        aria-label="Fullscreen"
-        onClick={toggleFullscreen}
-      >
-        ⛶
+        {copied && (
+          <span className="pointer-events-none absolute bottom-full right-0 mb-2 whitespace-nowrap rounded-md bg-black/80 px-2 py-1 text-xs text-white">
+            Link copied
+          </span>
+        )}
       </button>
     </div>
   );

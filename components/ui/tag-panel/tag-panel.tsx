@@ -10,7 +10,7 @@ export function TagPanel() {
   if (!tag) return null;
 
   return (
-    <div className="absolute bottom-20 left-4 z-40 max-w-xs rounded-lg bg-black/70 p-4 text-white backdrop-blur">
+    <div className="absolute bottom-24 left-4 z-40 max-w-xs rounded-xl border border-white/10 bg-black/65 p-4 text-white shadow-[0_8px_28px_rgba(0,0,0,0.45)] backdrop-blur-md">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-semibold" style={{ color: tag.color }}>
           {tag.title}
@@ -18,7 +18,7 @@ export function TagPanel() {
         <button
           onClick={() => selectTag(null)}
           aria-label="Close"
-          className="-mt-1 text-lg leading-none text-white/60 hover:text-white"
+          className="-mt-1 rounded text-lg leading-none text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
           ×
         </button>

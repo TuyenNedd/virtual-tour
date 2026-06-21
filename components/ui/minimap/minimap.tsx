@@ -41,7 +41,7 @@ export function Minimap() {
 
   return (
     <div
-      className="absolute right-4 top-4 z-40 rounded-lg border border-white/20 bg-black/50 backdrop-blur"
+      className="absolute right-4 top-4 z-40 overflow-hidden rounded-xl border border-white/10 bg-black/55 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-md"
       style={{ width: SIZE, height: SIZE }}
     >
       <svg width={SIZE} height={SIZE}>

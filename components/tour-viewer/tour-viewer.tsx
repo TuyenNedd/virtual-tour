@@ -10,13 +10,10 @@ import { isWebGLAvailable } from "@/lib/webgl";
 import { INSIDE_FOV, DRACO_PATH, FALLBACK_MODEL_URL } from "@/lib/constants";
 import { Scene } from "../canvas/scene/scene";
 import { LoadingScreen } from "../ui/loading-screen/loading-screen";
-import { ModeToggle } from "../ui/mode-toggle/mode-toggle";
-import { ViewControls } from "../ui/view-controls/view-controls";
 import { FloorSelector } from "../ui/floor-selector/floor-selector";
 import { Minimap } from "../ui/minimap/minimap";
 import { TagPanel } from "../ui/tag-panel/tag-panel";
-import { MeasureControls } from "../ui/measure-controls/measure-controls";
-import { GuidedTour } from "../ui/guided-tour/guided-tour";
+import { Toolbar } from "../ui/toolbar/toolbar";
 import { DeepLink } from "../deep-link/deep-link";
 
 export function TourViewer() {
@@ -91,15 +88,12 @@ export function TourViewer() {
       </Canvas>
       {space && (
         <>
-          <div className="absolute left-4 top-4 z-40 rounded-md bg-black/45 px-3 py-1.5 text-sm text-white">
+          <div className="absolute left-4 top-4 z-40 rounded-full border border-white/10 bg-black/55 px-3.5 py-1.5 text-sm font-medium text-white/90 backdrop-blur-md">
             Virtual Tour
           </div>
           <Minimap />
           <FloorSelector />
-          <ModeToggle />
-          <ViewControls />
-          <MeasureControls />
-          <GuidedTour />
+          <Toolbar />
           <TagPanel />
           <DeepLink />
         </>
