@@ -15,6 +15,7 @@ import { Minimap } from "../ui/minimap/minimap";
 import { TagPanel } from "../ui/tag-panel/tag-panel";
 import { Toolbar } from "../ui/toolbar/toolbar";
 import { DeepLink } from "../deep-link/deep-link";
+import { refractive } from "@hashintel/refractive";
 
 export function TourViewer() {
   const setSpace = useViewStore((s) => s.setSpace);
@@ -88,9 +89,12 @@ export function TourViewer() {
       </Canvas>
       {space && (
         <>
-          <div className="absolute left-4 top-4 z-40 rounded-full border border-white/10 bg-black/55 px-3.5 py-1.5 text-sm font-medium text-white/90 backdrop-blur-md">
+          <refractive.div
+            refraction={{ radius: 18, blur: 5, bezelWidth: 8 }}
+            className="absolute left-4 top-4 z-40 border border-white/10 bg-black/40 px-3.5 py-1.5 text-sm font-medium text-white/90"
+          >
             Virtual Tour
-          </div>
+          </refractive.div>
           <Minimap />
           <FloorSelector />
           <Toolbar />

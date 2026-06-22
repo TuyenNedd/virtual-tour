@@ -1,5 +1,6 @@
 "use client";
 import { useMemo } from "react";
+import { refractive } from "@hashintel/refractive";
 import { useViewStore } from "@/stores/view-store";
 import { sweepsOnFloor } from "@/lib/sweep-graph";
 
@@ -40,8 +41,9 @@ export function Minimap() {
   const facingDeg = (facing * 180) / Math.PI;
 
   return (
-    <div
-      className="absolute right-4 top-4 z-40 overflow-hidden rounded-xl border border-white/10 bg-black/55 shadow-[0_8px_28px_rgba(0,0,0,0.4)] backdrop-blur-md"
+    <refractive.div
+      refraction={{ radius: 14, blur: 6, bezelWidth: 8 }}
+      className="absolute right-4 top-4 z-40 overflow-hidden border border-white/10 bg-black/40 shadow-[0_8px_28px_rgba(0,0,0,0.4)]"
       style={{ width: SIZE, height: SIZE }}
     >
       <svg width={SIZE} height={SIZE}>
@@ -70,6 +72,6 @@ export function Minimap() {
           />
         )}
       </svg>
-    </div>
+    </refractive.div>
   );
 }
