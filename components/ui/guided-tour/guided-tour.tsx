@@ -100,6 +100,20 @@ export function GuidedTour() {
       <span className="max-w-[7rem] truncate px-1 text-xs text-white/90">
         {index + 1}/{stops.length} · {stops[index]?.title}
       </span>
+      {playing && (
+        <span
+          className="relative block h-1 w-12 overflow-hidden rounded-full bg-white/20"
+          aria-hidden="true"
+        >
+          <span
+            key={index}
+            className="absolute inset-0 origin-left rounded-full bg-cyan-400"
+            style={{
+              animation: `tour-progress ${AUTOPLAY_MS}ms linear forwards`,
+            }}
+          />
+        </span>
+      )}
       <button
         className={iconBtn}
         aria-label="Close tour"
