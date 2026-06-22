@@ -1,5 +1,6 @@
 "use client";
 import { refractive } from "@hashintel/refractive";
+import { LIQUID_GLASS } from "@/lib/constants";
 import { ModeToggle } from "../mode-toggle/mode-toggle";
 import { MeasureControls } from "../measure-controls/measure-controls";
 import { GuidedTour } from "../guided-tour/guided-tour";
@@ -15,8 +16,8 @@ export function Toolbar() {
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-4 z-40 flex justify-center px-3">
       <refractive.div
-        refraction={{ radius: 24, blur: 6, bezelWidth: 10 }}
-        className="pointer-events-auto relative flex max-w-[calc(100vw-1.5rem)] items-center gap-1.5 overflow-visible border border-white/10 bg-black/40 p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.45)]"
+        refraction={{ ...LIQUID_GLASS, radius: 24, bezelWidth: 10 }}
+        className="pointer-events-auto relative flex max-w-[calc(100vw-1.5rem)] items-center gap-1.5 overflow-visible border border-white/10 p-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.45)]"
       >
         <ModeToggle />
         <Divider />

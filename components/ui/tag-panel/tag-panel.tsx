@@ -1,6 +1,7 @@
 "use client";
 import { refractive } from "@hashintel/refractive";
 import { useViewStore } from "@/stores/view-store";
+import { LIQUID_GLASS } from "@/lib/constants";
 
 export function TagPanel() {
   const tags = useViewStore((s) => s.tags);
@@ -12,7 +13,7 @@ export function TagPanel() {
 
   return (
     <refractive.div
-      refraction={{ radius: 14, blur: 6, bezelWidth: 8 }}
+      refraction={{ ...LIQUID_GLASS, radius: 14, bezelWidth: 10 }}
       className="absolute bottom-24 left-4 z-40 max-w-xs border border-white/10 bg-black/45 p-4 text-white shadow-[0_8px_28px_rgba(0,0,0,0.45)]"
     >
       <div className="flex items-start justify-between gap-3">

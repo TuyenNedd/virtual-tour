@@ -7,7 +7,12 @@ import { loadSpace, fallbackSpace } from "@/lib/space";
 import { loadTags } from "@/lib/tags";
 import { loadRooms } from "@/lib/rooms";
 import { isWebGLAvailable } from "@/lib/webgl";
-import { INSIDE_FOV, DRACO_PATH, FALLBACK_MODEL_URL } from "@/lib/constants";
+import {
+  INSIDE_FOV,
+  DRACO_PATH,
+  FALLBACK_MODEL_URL,
+  LIQUID_GLASS,
+} from "@/lib/constants";
 import { Scene } from "../canvas/scene/scene";
 import { LoadingScreen } from "../ui/loading-screen/loading-screen";
 import { FloorSelector } from "../ui/floor-selector/floor-selector";
@@ -90,7 +95,7 @@ export function TourViewer() {
       {space && (
         <>
           <refractive.div
-            refraction={{ radius: 18, blur: 5, bezelWidth: 8 }}
+            refraction={{ ...LIQUID_GLASS, radius: 18, bezelWidth: 10 }}
             className="absolute left-4 top-4 z-40 border border-white/10 bg-black/40 px-3.5 py-1.5 text-sm font-medium text-white/90"
           >
             Virtual Tour

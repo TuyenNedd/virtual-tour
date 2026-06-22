@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { refractive } from "@hashintel/refractive";
 import { useViewStore } from "@/stores/view-store";
 import { sweepsOnFloor } from "@/lib/sweep-graph";
+import { LIQUID_GLASS } from "@/lib/constants";
 
 const SIZE = 128;
 const PAD = 10;
@@ -42,7 +43,7 @@ export function Minimap() {
 
   return (
     <refractive.div
-      refraction={{ radius: 14, blur: 6, bezelWidth: 8 }}
+      refraction={{ ...LIQUID_GLASS, radius: 14, bezelWidth: 10 }}
       className="absolute right-4 top-4 z-40 overflow-hidden border border-white/10 bg-black/40 shadow-[0_8px_28px_rgba(0,0,0,0.4)]"
       style={{ width: SIZE, height: SIZE }}
     >
