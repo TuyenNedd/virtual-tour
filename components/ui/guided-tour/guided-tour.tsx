@@ -80,7 +80,12 @@ export function GuidedTour() {
       <button
         className={iconBtn}
         aria-label={playing ? "Pause tour" : "Play tour"}
-        onClick={() => setPlaying((p) => !p)}
+        onClick={() => {
+          const next = !playing;
+          setPlaying(next);
+          // give immediate feedback: advance right away, then autoplay continues
+          if (next) goTo(index < stops.length - 1 ? index + 1 : 0);
+        }}
       >
         {playing ? "❚❚" : "▶"}
       </button>
