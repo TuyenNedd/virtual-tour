@@ -1,5 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
+import { Ruler } from "lucide-react";
 import { useViewStore } from "@/stores/view-store";
 import { GLASS_SPRING } from "@/lib/constants";
 
@@ -37,7 +38,10 @@ export function MeasureControls() {
                   : "text-white/70 hover:bg-white/10 hover:text-white"
               }`}
             >
-              Measure
+              <span className="flex items-center gap-1.5">
+                <Ruler size={14} />
+                Measure
+              </span>
             </motion.button>
           </motion.div>
         )}

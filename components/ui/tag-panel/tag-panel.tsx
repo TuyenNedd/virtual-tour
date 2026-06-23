@@ -1,4 +1,5 @@
 "use client";
+import { X } from "lucide-react";
 import { refractive } from "@hashintel/refractive";
 import { useViewStore } from "@/stores/view-store";
 import { LIQUID_GLASS } from "@/lib/constants";
@@ -23,9 +24,9 @@ export function TagPanel() {
         <button
           onClick={() => selectTag(null)}
           aria-label="Close"
-          className="-mt-1 rounded text-lg leading-none text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          className="-mr-1 -mt-1 flex h-6 w-6 items-center justify-center rounded text-white/60 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
-          ×
+          <X size={15} />
         </button>
       </div>
       <p className="mt-1 text-xs leading-relaxed text-white/80">{tag.body}</p>

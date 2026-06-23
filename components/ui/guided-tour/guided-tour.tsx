@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Play, Pause, X } from "lucide-react";
 import { useViewStore } from "@/stores/view-store";
 import { nearestSweep } from "@/lib/sweep-graph";
 import { GLASS_SPRING } from "@/lib/constants";
@@ -95,7 +96,7 @@ export function GuidedTour() {
               disabled={index === 0}
               onClick={() => index > 0 && goTo(index - 1)}
             >
-              ‹
+              <ChevronLeft size={18} />
             </motion.button>
             <motion.button
               whileTap={TAP}
@@ -107,7 +108,7 @@ export function GuidedTour() {
                 if (next) goTo(index < stops.length - 1 ? index + 1 : 0);
               }}
             >
-              {playing ? "❚❚" : "▶"}
+              {playing ? <Pause size={15} /> : <Play size={15} />}
             </motion.button>
             <motion.button
               whileTap={TAP}
@@ -116,7 +117,7 @@ export function GuidedTour() {
               disabled={index === stops.length - 1}
               onClick={() => index < stops.length - 1 && goTo(index + 1)}
             >
-              ›
+              <ChevronRight size={18} />
             </motion.button>
             <span className="whitespace-nowrap px-1 text-xs text-white/90">
               {index + 1}/{stops.length} · {stops[index]?.title}
@@ -144,7 +145,7 @@ export function GuidedTour() {
                 setPlaying(false);
               }}
             >
-              ×
+              <X size={16} />
             </motion.button>
           </div>
         </motion.div>
