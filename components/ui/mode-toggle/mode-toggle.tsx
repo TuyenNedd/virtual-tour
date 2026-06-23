@@ -1,13 +1,14 @@
 "use client";
 import { motion } from "framer-motion";
+import { Eye, Box, Map, type LucideIcon } from "lucide-react";
 import { useViewStore } from "@/stores/view-store";
 import { GLASS_SPRING } from "@/lib/constants";
 import type { ViewMode } from "@/lib/types";
 
-const MODES: { id: ViewMode; label: string }[] = [
-  { id: "inside", label: "Inside" },
-  { id: "dollhouse", label: "Dollhouse" },
-  { id: "floorplan", label: "Floorplan" },
+const MODES: { id: ViewMode; label: string; Icon: LucideIcon }[] = [
+  { id: "inside", label: "Inside", Icon: Eye },
+  { id: "dollhouse", label: "Dollhouse", Icon: Box },
+  { id: "floorplan", label: "Floorplan", Icon: Map },
 ];
 
 // Segmented mode switch: a glassy thumb slides between options (shared layout)
@@ -31,7 +32,7 @@ export function ModeToggle() {
             aria-pressed={active}
             whileTap={{ scale: 0.92 }}
             transition={GLASS_SPRING}
-            className="relative z-10 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+            className="relative z-10 rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             {active && (
               <motion.span
@@ -41,10 +42,11 @@ export function ModeToggle() {
               />
             )}
             <span
-              className={
+              className={`flex items-center gap-1.5 ${
                 active ? "text-neutral-900" : "text-white/70 hover:text-white"
-              }
+              }`}
             >
+              <m.Icon size={15} />
               {m.label}
             </span>
           </motion.button>
