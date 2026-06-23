@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Play, Pause, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Pause, X, Route } from "lucide-react";
 import { useViewStore } from "@/stores/view-store";
 import { nearestSweep } from "@/lib/sweep-graph";
 import { GLASS_SPRING } from "@/lib/constants";
@@ -76,7 +76,10 @@ export function GuidedTour() {
             }}
             className="whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium text-white/70 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            Tour
+            <span className="flex items-center gap-1.5">
+              <Route size={15} />
+              Tour
+            </span>
           </motion.button>
         </motion.div>
       ) : (
