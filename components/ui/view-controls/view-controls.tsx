@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 function toggleFullscreen() {
   if (!document.fullscreenElement) document.documentElement.requestFullscreen();
@@ -13,6 +14,7 @@ function zoom(deltaY: number) {
 
 const ICON_BTN =
   "flex h-9 w-9 items-center justify-center rounded-full text-lg text-white/80 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400";
+const TAP = { scale: 0.88 };
 
 // Zoom / fullscreen / share. Rendered inline inside the Toolbar.
 export function ViewControls() {
@@ -30,28 +32,32 @@ export function ViewControls() {
 
   return (
     <div className="flex items-center gap-0.5">
-      <button
+      <motion.button
+        whileTap={TAP}
         className={ICON_BTN}
         aria-label="Zoom out"
         onClick={() => zoom(120)}
       >
         −
-      </button>
-      <button
+      </motion.button>
+      <motion.button
+        whileTap={TAP}
         className={ICON_BTN}
         aria-label="Zoom in"
         onClick={() => zoom(-120)}
       >
         +
-      </button>
-      <button
+      </motion.button>
+      <motion.button
+        whileTap={TAP}
         className={ICON_BTN}
         aria-label="Toggle fullscreen"
         onClick={toggleFullscreen}
       >
         ⛶
-      </button>
-      <button
+      </motion.button>
+      <motion.button
+        whileTap={TAP}
         className={`${ICON_BTN} relative`}
         aria-label="Copy share link"
         onClick={share}
@@ -75,7 +81,7 @@ export function ViewControls() {
             Link copied
           </span>
         )}
-      </button>
+      </motion.button>
     </div>
   );
 }

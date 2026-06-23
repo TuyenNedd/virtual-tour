@@ -26,7 +26,16 @@ export const MODEL_UP_FIX_ROTATION_X = -Math.PI / 2;
 // the article is not exposed in refractive v0.0.4, so it's omitted.
 // Each surface adds its own `radius` (and optional `bezelWidth`).
 export const LIQUID_GLASS = {
-  blur: 0,
+  blur: 2,
   specularOpacity: 0.4,
   refractiveIndex: 1.5,
+} as const;
+
+// Shared spring so the mode thumb, toolbar resize, and item enter/exit all
+// move in sync (the iOS "liquid" feel).
+export const GLASS_SPRING = {
+  type: "spring",
+  stiffness: 500,
+  damping: 32,
+  mass: 0.8,
 } as const;
